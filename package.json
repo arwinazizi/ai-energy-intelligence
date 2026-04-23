@@ -1,0 +1,11 @@
+{
+  "name": "ai-energy-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Proxy-based measurement layer for AI usage.",
+  "workspaces": [
+    "apps/backend",
+    "apps/dashboard",
+    "packages/shared"
+  ]
+}

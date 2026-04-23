@@ -1,0 +1,40 @@
+name: Bug
+description: Report a concrete defect or regression.
+title: "[Bug] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is broken?
+      placeholder: The proxy strips the upstream status code and always returns 200.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Exact steps or request details.
+      placeholder: |
+        1. Start backend
+        2. Send invalid OpenAI payload through /openai/...
+        3. Observe status mismatch
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: The proxy should return the same status code as upstream.
+    validations:
+      required: true
+  - type: textarea
+    id: done_criteria
+    attributes:
+      label: Done Criteria
+      placeholder: |
+        - Root cause identified
+        - Regression fixed
+        - Verification recorded
+    validations:
+      required: true

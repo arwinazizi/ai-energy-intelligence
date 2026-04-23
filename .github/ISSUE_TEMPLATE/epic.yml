@@ -1,0 +1,51 @@
+name: Epic
+description: Track a milestone-sized body of work with linked tasks.
+title: "[Epic] "
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What becomes true when this epic is done?
+      placeholder: The V1 proxy can forward OpenAI requests and log usage to Supabase.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: In Scope
+      description: Concrete items this epic owns.
+      placeholder: |
+        - Proxy pass-through
+        - Usage extraction
+        - Async logging
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out Of Scope
+      description: Explicitly exclude work to prevent scope drift.
+      placeholder: |
+        - Multi-tenant support
+        - Anthropic support
+        - Production security hardening
+  - type: textarea
+    id: linked_tasks
+    attributes:
+      label: Linked Tasks
+      description: Add issue references as they are created.
+      placeholder: |
+        - #123
+        - #124
+  - type: textarea
+    id: done_criteria
+    attributes:
+      label: Done Criteria
+      description: How do we know this epic is complete?
+      placeholder: |
+        - Real request passes through proxy
+        - Usage is persisted
+        - Summary endpoint returns data
+    validations:
+      required: true

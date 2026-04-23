@@ -1,0 +1,40 @@
+name: Task
+description: Track one bounded unit of work.
+title: "[Task] "
+body:
+  - type: input
+    id: outcome
+    attributes:
+      label: Outcome
+      description: Specific result expected from this task.
+      placeholder: Add an OpenAI proxy route that forwards POST requests unchanged.
+    validations:
+      required: true
+  - type: textarea
+    id: implementation_notes
+    attributes:
+      label: Implementation Notes
+      description: Constraints, assumptions, or technical notes.
+      placeholder: Reuse native fetch in Node, keep response body untouched, measure latency.
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Flat checklist only.
+      placeholder: |
+        - [ ] Add file
+        - [ ] Add tests or smoke validation
+        - [ ] Update tracker issue
+    validations:
+      required: true
+  - type: textarea
+    id: done_criteria
+    attributes:
+      label: Done Criteria
+      description: Observable completion conditions.
+      placeholder: |
+        - Route exists
+        - Request forwarding works
+        - Smoke test passes
+    validations:
+      required: true

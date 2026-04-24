@@ -12,11 +12,13 @@ This file is the local fallback tracker until the GitHub repository exists and t
 
 ## In Progress
 
+- Repair GitHub CLI authentication
 - Create the GitHub repository
 - Seed the GitHub tracker issue and initial backlog
 
 ## Next
 
+- Re-authenticate GitHub CLI
 - Publish the local repository to GitHub
 - Create tracker and V1 epic issues
 - Create the proxy pass-through task issue
@@ -32,7 +34,8 @@ This file is the local fallback tracker until the GitHub repository exists and t
 
 ## Risks / Blockers
 
-- `gh` is installed but not authenticated in this environment, so GitHub repository creation is currently blocked
+- `gh` is installed but the stored token is invalid in this environment, so GitHub repository creation is currently blocked
+- GitHub issue creation depends on the remote repository existing first
 
 ## Decisions
 

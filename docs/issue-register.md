@@ -14,6 +14,7 @@ This is the bootstrap issue ledger before GitHub issue numbers exist. When the G
 | AEI-007 | Todo | Summary API | Expose `GET /api/summary` and `GET /api/recent`. | Pending |
 | AEI-008 | Todo | Dashboard UI | Render summary cards and recent logs table. | Pending |
 | AEI-009 | Todo | Smoke Test And Demo Path | Prove one request flows through proxy to log to dashboard. | Pending |
+| AEI-010 | In Progress | GitHub Bootstrap | Repair `gh` auth, create remote, push `main`, and seed issues. | Pending |
 
 ## Rules
 

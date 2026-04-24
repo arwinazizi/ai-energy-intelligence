@@ -45,6 +45,7 @@ supabase/
 - [docs/architecture.md](./docs/architecture.md)
 - [docs/project-status.md](./docs/project-status.md)
 - [docs/issue-register.md](./docs/issue-register.md)
+- [docs/github-bootstrap.md](./docs/github-bootstrap.md)
 - [docs/tracking.md](./docs/tracking.md)
 - [docs/v1-build-plan.md](./docs/v1-build-plan.md)
 

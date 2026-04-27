@@ -4,12 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "npm --workspace @aei/shared run build",
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
+    "presmoke:usage": "npm --workspace @aei/shared run build",
     "smoke:usage": "tsx src/smoke/openaiUsageExtractionSmoke.ts",
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@aei/shared": "0.1.0",
     "express": "^5.2.1"
   },
   "devDependencies": {

@@ -18,6 +18,9 @@ This file is the local fallback tracker until the GitHub tracker issue is create
 - Pushed `main` to the GitHub remote at `arwinazizi/ai-energy-intelligence`
 - Added usage extraction for non-streaming OpenAI JSON responses while preserving upstream status and raw body
 - Added a repeatable fake-upstream smoke test for the usage extraction path
+- Added shared V1 cost, energy, and CO2 calculation types, constants, and calculator logic
+- Wired calculated `cost_usd`, `energy_kwh`, and `co2_grams` into the console-only OpenAI usage payload
+- Extended the fake-upstream smoke test to verify calculated usage-impact values while preserving the upstream response
 
 ## In Progress
 
@@ -50,3 +53,4 @@ This file is the local fallback tracker until the GitHub tracker issue is create
 - GitHub issues will be the long-term source of truth for work tracking
 - Until GitHub issues are seeded, `docs/project-status.md` and `docs/issue-register.md` are the fallback source of truth
 - The backend loads `.env` from the repository root for local development
+- AEI-006 was intentionally completed before AEI-004 in this session; AEI-004 remains the next persistence task

@@ -2,6 +2,7 @@ import type { IncomingHttpHeaders } from "node:http";
 import http from "node:http";
 import https from "node:https";
 import type { Request, Response } from "express";
+import { calculateCostEnergyCo2 } from "@aei/shared";
 import { buildOpenAiUrl, getOpenAiApiKey } from "../providers/openai.js";
 import { extractOpenAiUsagePayload } from "./usageExtraction.js";
 
@@ -97,7 +98,10 @@ export function openAiProxy(req: Request, res: Response): void {
         });
 
         if (usagePayload) {
-          console.log("OpenAI usage extracted", usagePayload);
+          console.log("OpenAI usage extracted", {
+            ...usagePayload,
+            ...calculateCostEnergyCo2(usagePayload)
+          });
         }
 
         res.status(statusCode).end(responseBody);

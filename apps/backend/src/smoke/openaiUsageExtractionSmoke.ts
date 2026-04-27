@@ -33,6 +33,11 @@ function assert(condition: unknown, message: string): asserts condition {
   }
 }
 
+function assertNear(actual: unknown, expected: number, message: string): void {
+  assert(typeof actual === "number", message);
+  assert(Math.abs(actual - expected) < 0.000000000001, message);
+}
+
 function listen(server: http.Server): Promise<number> {
   return new Promise((resolve, reject) => {
     const onError = (error: Error) => {
@@ -145,6 +150,9 @@ try {
   assert(usagePayload.input_tokens === 11, "Usage payload input_tokens was not extracted");
   assert(usagePayload.output_tokens === 7, "Usage payload output_tokens was not extracted");
   assert(usagePayload.total_tokens === 18, "Usage payload total_tokens was not extracted");
+  assertNear(usagePayload.cost_usd, 0.0000156, "Usage payload cost_usd was not calculated");
+  assertNear(usagePayload.energy_kwh, 0.0000054, "Usage payload energy_kwh was not calculated");
+  assertNear(usagePayload.co2_grams, 0.00216, "Usage payload co2_grams was not calculated");
 
   originalConsoleLog("Usage extraction smoke test passed");
 } finally {

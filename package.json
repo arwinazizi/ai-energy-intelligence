@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "dev:backend": "npm --workspace @aei/backend run dev",
-    "build:backend": "npm --workspace @aei/backend run build",
+    "build:shared": "npm --workspace @aei/shared run build",
+    "build:backend": "npm --workspace @aei/shared run build && npm --workspace @aei/backend run build",
     "dev:dashboard": "npm --workspace @aei/dashboard run dev",
     "build:dashboard": "npm --workspace @aei/dashboard run build",
     "preview:dashboard": "npm --workspace @aei/dashboard run preview"

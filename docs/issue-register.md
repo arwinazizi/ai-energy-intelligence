@@ -10,7 +10,7 @@ This is the bootstrap issue ledger before GitHub issue numbers exist. When the G
 | AEI-003 | Done | Usage Extraction | Parse model, tokens, and latency from OpenAI responses. | Pending |
 | AEI-004 | Todo | Supabase Persistence | Insert usage rows and support summary queries. | Pending |
 | AEI-005 | Todo | API Key Validation | Validate a shared API key via hashed lookup. | Pending |
-| AEI-006 | Todo | Cost / Energy / CO2 Calculation | Compute V1 estimates from usage events. | Pending |
+| AEI-006 | Done | Cost / Energy / CO2 Calculation | Compute V1 estimates from usage events. | Pending |
 | AEI-007 | Todo | Summary API | Expose `GET /api/summary` and `GET /api/recent`. | Pending |
 | AEI-008 | Todo | Dashboard UI | Render summary cards and recent logs table. | Pending |
 | AEI-009 | Todo | Smoke Test And Demo Path | Prove one request flows through proxy to log to dashboard. | Pending |

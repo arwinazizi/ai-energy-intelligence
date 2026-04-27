@@ -1,3 +1,4 @@
+import type { IncomingHttpHeaders } from "node:http";
 import http from "node:http";
 import express from "express";
 import { openAiProxy } from "../proxy/openaiProxy.js";
@@ -27,6 +28,13 @@ type SeenRequest = {
   body: string;
 };
 
+type SeenSupabaseInsert = {
+  method?: string;
+  url?: string;
+  headers: IncomingHttpHeaders;
+  body: string;
+};
+
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
     throw new Error(message);
@@ -36,6 +44,26 @@ function assert(condition: unknown, message: string): asserts condition {
 function assertNear(actual: unknown, expected: number, message: string): void {
   assert(typeof actual === "number", message);
   assert(Math.abs(actual - expected) < 0.000000000001, message);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function waitFor(condition: () => boolean, message: string): Promise<void> {
+  const expiresAt = Date.now() + 1_000;
+
+  while (Date.now() < expiresAt) {
+    if (condition()) {
+      return;
+    }
+
+    await sleep(10);
+  }
+
+  throw new Error(message);
 }
 
 function listen(server: http.Server): Promise<number> {
@@ -87,6 +115,33 @@ function createFakeUpstream(seenRequest: SeenRequest): http.Server {
   });
 }
 
+function createFakeSupabase(
+  seenInserts: SeenSupabaseInsert[],
+  getStatusCode: () => number,
+  getResponseBody: () => string
+): http.Server {
+  return http.createServer((req, res) => {
+    const chunks: Buffer[] = [];
+
+    req.on("data", (chunk: Buffer | string) => {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    });
+
+    req.on("end", () => {
+      seenInserts.push({
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+        body: Buffer.concat(chunks).toString("utf8")
+      });
+
+      res.statusCode = getStatusCode();
+      res.setHeader("content-type", "application/json");
+      res.end(getResponseBody());
+    });
+  });
+}
+
 function createProxyServer(): http.Server {
   const app = express();
 
@@ -104,10 +159,22 @@ function createProxyServer(): http.Server {
 
 const previousBaseUrl = process.env.OPENAI_BASE_URL;
 const previousApiKey = process.env.OPENAI_API_KEY;
+const previousSupabaseUrl = process.env.SUPABASE_URL;
+const previousSupabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const originalConsoleLog = console.log;
+const originalConsoleWarn = console.warn;
 const consoleLogs: unknown[][] = [];
+const consoleWarnings: unknown[][] = [];
 const seenRequest: SeenRequest = { body: "" };
+const seenSupabaseInserts: SeenSupabaseInsert[] = [];
+let supabaseStatusCode = 201;
+let supabaseResponseBody = "";
 const fakeUpstream = createFakeUpstream(seenRequest);
+const fakeSupabase = createFakeSupabase(
+  seenSupabaseInserts,
+  () => supabaseStatusCode,
+  () => supabaseResponseBody
+);
 const proxyServer = createProxyServer();
 
 console.log = (...args: unknown[]) => {
@@ -115,10 +182,17 @@ console.log = (...args: unknown[]) => {
   originalConsoleLog(...args);
 };
 
+console.warn = (...args: unknown[]) => {
+  consoleWarnings.push(args);
+};
+
 try {
   const upstreamPort = await listen(fakeUpstream);
   process.env.OPENAI_BASE_URL = `http://127.0.0.1:${upstreamPort}`;
   delete process.env.OPENAI_API_KEY;
+  const supabasePort = await listen(fakeSupabase);
+  process.env.SUPABASE_URL = `http://127.0.0.1:${supabasePort}`;
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
 
   const proxyPort = await listen(proxyServer);
   const response = await fetch(`http://127.0.0.1:${proxyPort}/openai/v1/chat/completions?source=smoke`, {
@@ -154,9 +228,66 @@ try {
   assertNear(usagePayload.energy_kwh, 0.0000054, "Usage payload energy_kwh was not calculated");
   assertNear(usagePayload.co2_grams, 0.00216, "Usage payload co2_grams was not calculated");
 
+  await waitFor(() => seenSupabaseInserts.length === 1, "Expected usage payload to be inserted into Supabase");
+  const usageInsert = seenSupabaseInserts[0];
+  assert(usageInsert.method === "POST", `Expected Supabase POST, received ${usageInsert.method}`);
+  assert(
+    usageInsert.url === "/rest/v1/usage_logs",
+    `Expected Supabase usage_logs insert URL, received ${usageInsert.url}`
+  );
+  assert(usageInsert.headers.apikey === "service-role-key", "Supabase apikey header was not sent");
+  assert(
+    usageInsert.headers.authorization === "Bearer service-role-key",
+    "Supabase authorization header was not sent"
+  );
+  assert(usageInsert.headers.prefer === "return=minimal", "Supabase prefer header was not sent");
+
+  const insertedUsage = JSON.parse(usageInsert.body) as Record<string, unknown>;
+  assert(insertedUsage.provider === "openai", "Supabase payload provider was not set");
+  assert(insertedUsage.endpoint === "/v1/chat/completions", "Supabase payload endpoint was not set");
+  assert(insertedUsage.status_code === 207, "Supabase payload status_code was not set");
+  assert(typeof insertedUsage.latency_ms === "number", "Supabase payload latency_ms was not set");
+  assert(insertedUsage.model === "gpt-4.1-mini", "Supabase payload model was not set");
+  assert(insertedUsage.input_tokens === 11, "Supabase payload input_tokens was not set");
+  assert(insertedUsage.output_tokens === 7, "Supabase payload output_tokens was not set");
+  assert(!("total_tokens" in insertedUsage), "Supabase payload should let the generated total_tokens column compute");
+  assertNear(insertedUsage.cost_usd, 0.0000156, "Supabase payload cost_usd was not set");
+  assertNear(insertedUsage.energy_kwh, 0.0000054, "Supabase payload energy_kwh was not set");
+  assertNear(insertedUsage.co2_grams, 0.00216, "Supabase payload co2_grams was not set");
+
+  supabaseStatusCode = 500;
+  supabaseResponseBody = '{"message":"fake persistence failure"}';
+
+  const failureResponse = await fetch(
+    `http://127.0.0.1:${proxyPort}/openai/v1/chat/completions?source=smoke-failure`,
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      body: clientRequestBody
+    }
+  );
+  const failureResponseBody = await failureResponse.text();
+
+  assert(failureResponse.status === 207, `Expected upstream status after logging failure, received ${failureResponse.status}`);
+  assert(failureResponseBody === upstreamResponseBody, "Logging failure changed the upstream response body");
+  await waitFor(() => seenSupabaseInserts.length === 2, "Expected failed usage insert attempt");
+  await waitFor(
+    () => consoleWarnings.some((args) => args[0] === "OpenAI usage persistence failed"),
+    "Expected logging failure to be console-warned"
+  );
+  const persistenceWarning = consoleWarnings.find((args) => args[0] === "OpenAI usage persistence failed");
+  assert(persistenceWarning?.[1] instanceof Error, "Expected persistence warning to include an Error");
+  assert(
+    (persistenceWarning[1] as Error).message.includes("500"),
+    "Expected persistence warning to include Supabase response status"
+  );
+
   originalConsoleLog("Usage extraction smoke test passed");
 } finally {
   console.log = originalConsoleLog;
+  console.warn = originalConsoleWarn;
 
   if (previousBaseUrl === undefined) {
     delete process.env.OPENAI_BASE_URL;
@@ -168,6 +299,16 @@ try {
   } else {
     process.env.OPENAI_API_KEY = previousApiKey;
   }
+  if (previousSupabaseUrl === undefined) {
+    delete process.env.SUPABASE_URL;
+  } else {
+    process.env.SUPABASE_URL = previousSupabaseUrl;
+  }
+  if (previousSupabaseServiceRoleKey === undefined) {
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  } else {
+    process.env.SUPABASE_SERVICE_ROLE_KEY = previousSupabaseServiceRoleKey;
+  }
 
-  await Promise.allSettled([close(proxyServer), close(fakeUpstream)]);
+  await Promise.allSettled([close(proxyServer), close(fakeUpstream), close(fakeSupabase)]);
 }

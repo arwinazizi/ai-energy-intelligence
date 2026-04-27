@@ -3,6 +3,7 @@ import http from "node:http";
 import https from "node:https";
 import type { Request, Response } from "express";
 import { calculateCostEnergyCo2 } from "@aei/shared";
+import { logUsage } from "../logging/logUsage.js";
 import { buildOpenAiUrl, getOpenAiApiKey } from "../providers/openai.js";
 import { extractOpenAiUsagePayload } from "./usageExtraction.js";
 
@@ -96,15 +97,25 @@ export function openAiProxy(req: Request, res: Response): void {
           headers: upstreamResponse.headers,
           body: responseBody
         });
+        const usageLog = usagePayload
+          ? {
+              provider: "openai" as const,
+              ...usagePayload,
+              ...calculateCostEnergyCo2(usagePayload)
+            }
+          : undefined;
 
-        if (usagePayload) {
-          console.log("OpenAI usage extracted", {
-            ...usagePayload,
-            ...calculateCostEnergyCo2(usagePayload)
-          });
+        if (usageLog) {
+          console.log("OpenAI usage extracted", usageLog);
         }
 
         res.status(statusCode).end(responseBody);
+
+        if (usageLog) {
+          void logUsage(usageLog).catch((error: unknown) => {
+            console.warn("OpenAI usage persistence failed", error);
+          });
+        }
       });
 
       upstreamResponse.on("error", (error) => {

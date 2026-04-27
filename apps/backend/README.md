@@ -27,7 +27,13 @@ The first proxy route is:
 
 Requests to `/openai/v1/...` are forwarded to `https://api.openai.com/v1/...` by default. Set `OPENAI_BASE_URL` to point at a different upstream during smoke tests. Set `OPENAI_API_KEY` to have the proxy apply the upstream bearer token when the request does not already include `Authorization`.
 
-This first pass does not include API key auth, Supabase persistence, usage extraction, cost calculations, or dashboard APIs.
+The proxy now extracts console-only usage payloads from non-streaming OpenAI JSON responses while preserving the upstream status code and raw response body for the client. API key auth, Supabase persistence, cost calculations, and dashboard APIs are still out of scope.
+
+Run the repeatable fake-upstream usage smoke test:
+
+```bash
+npm.cmd --workspace @aei/backend run smoke:usage
+```
 
 ## Suggested First Files
 

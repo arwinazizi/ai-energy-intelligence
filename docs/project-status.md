@@ -16,6 +16,8 @@ This file is the local fallback tracker until the GitHub tracker issue is create
 - Verified the proxy against a fake upstream for method, path/query, headers, body, status, and response headers
 - Verified a live OpenAI `/v1/models` request through the proxy using the gitignored root `.env`
 - Pushed `main` to the GitHub remote at `arwinazizi/ai-energy-intelligence`
+- Added usage extraction for non-streaming OpenAI JSON responses while preserving upstream status and raw body
+- Added a repeatable fake-upstream smoke test for the usage extraction path
 
 ## In Progress
 
@@ -23,7 +25,7 @@ This file is the local fallback tracker until the GitHub tracker issue is create
 
 ## Next
 
-- AEI-003: Usage Extraction
+- AEI-004: Supabase Persistence
 
 ## Later
 

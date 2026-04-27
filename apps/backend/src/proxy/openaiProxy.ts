@@ -3,6 +3,7 @@ import http from "node:http";
 import https from "node:https";
 import type { Request, Response } from "express";
 import { buildOpenAiUrl, getOpenAiApiKey } from "../providers/openai.js";
+import { extractOpenAiUsagePayload } from "./usageExtraction.js";
 
 const HOP_BY_HOP_HEADERS = new Set([
   "connection",
@@ -50,6 +51,7 @@ export function openAiProxy(req: Request, res: Response): void {
   const apiKey = getOpenAiApiKey();
   const requestBody = getRequestBody(req);
   const headers = copyHeaders(req.headers);
+  const startedAt = Date.now();
 
   if (apiKey && !headers.authorization) {
     headers.authorization = `Bearer ${apiKey}`;
@@ -69,7 +71,8 @@ export function openAiProxy(req: Request, res: Response): void {
       headers
     },
     (upstreamResponse) => {
-      res.status(upstreamResponse.statusCode || 502);
+      const statusCode = upstreamResponse.statusCode || 502;
+      const responseChunks: Buffer[] = [];
 
       for (const [name, value] of Object.entries(upstreamResponse.headers)) {
         if (!value || HOP_BY_HOP_HEADERS.has(name.toLowerCase())) {
@@ -79,7 +82,30 @@ export function openAiProxy(req: Request, res: Response): void {
         res.setHeader(name, value);
       }
 
-      upstreamResponse.pipe(res);
+      upstreamResponse.on("data", (chunk: Buffer | string) => {
+        responseChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      });
+
+      upstreamResponse.on("end", () => {
+        const responseBody = Buffer.concat(responseChunks);
+        const usagePayload = extractOpenAiUsagePayload({
+          endpoint: upstreamUrl.pathname,
+          statusCode,
+          latencyMs: Math.max(Date.now() - startedAt, 0),
+          headers: upstreamResponse.headers,
+          body: responseBody
+        });
+
+        if (usagePayload) {
+          console.log("OpenAI usage extracted", usagePayload);
+        }
+
+        res.status(statusCode).end(responseBody);
+      });
+
+      upstreamResponse.on("error", (error) => {
+        res.destroy(error);
+      });
     }
   );
 

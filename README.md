@@ -10,6 +10,8 @@ This repository is a V1 prototype scaffold based on [IMPLEMENTATION.md](./IMPLEM
 - architecture and execution docs for the V1 prototype
 - a static V0 dashboard concept in `apps/dashboard`
 - an Express `/openai/*` proxy pass-through in `apps/backend`
+- console-only usage extraction for non-streaming OpenAI JSON responses
+- a fake-upstream backend smoke test for usage extraction
 - a first Supabase migration
 - environment and repository hygiene files
 
@@ -52,4 +54,4 @@ supabase/
 - [docs/tracking.md](./docs/tracking.md)
 - [docs/v1-build-plan.md](./docs/v1-build-plan.md)
 
-The immediate next implementation step is AEI-003: usage extraction from proxied OpenAI responses while preserving the upstream response for the client.
+AEI-003 usage extraction is complete. Current task status is tracked in [docs/project-status.md](./docs/project-status.md) and [docs/issue-register.md](./docs/issue-register.md).

@@ -9,5 +9,9 @@ coverage/
 .env.local
 .env.*.local
 *.log
+*.tsbuildinfo
+.codex-edge-profile*/
+*-screenshot.png
+v0-dashboard-*.png
 .DS_Store
 Thumbs.db

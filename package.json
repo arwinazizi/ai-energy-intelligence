@@ -7,5 +7,12 @@
     "apps/backend",
     "apps/dashboard",
     "packages/shared"
-  ]
+  ],
+  "scripts": {
+    "dev:backend": "npm --workspace @aei/backend run dev",
+    "build:backend": "npm --workspace @aei/backend run build",
+    "dev:dashboard": "npm --workspace @aei/dashboard run dev",
+    "build:dashboard": "npm --workspace @aei/dashboard run build",
+    "preview:dashboard": "npm --workspace @aei/dashboard run preview"
+  }
 }

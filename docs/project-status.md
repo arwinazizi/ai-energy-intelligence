@@ -1,6 +1,6 @@
 # Project Status
 
-This file is the local fallback tracker until the GitHub repository exists and the tracker issue is created there. After GitHub is active, this should mirror the tracker issue rather than diverge from it.
+This file is the local fallback tracker until the GitHub tracker issue is created. After GitHub issues are active, this should mirror the tracker issue rather than diverge from it.
 
 ## Done
 
@@ -15,6 +15,7 @@ This file is the local fallback tracker until the GitHub repository exists and t
 - Built the smallest Express backend proxy for `/openai/*`
 - Verified the proxy against a fake upstream for method, path/query, headers, body, status, and response headers
 - Verified a live OpenAI `/v1/models` request through the proxy using the gitignored root `.env`
+- Pushed `main` to the GitHub remote at `arwinazizi/ai-energy-intelligence`
 
 ## In Progress
 
@@ -27,9 +28,8 @@ This file is the local fallback tracker until the GitHub repository exists and t
 ## Later
 
 - Re-authenticate GitHub CLI
-- Publish the local repository to GitHub
 - Create tracker and V1 epic issues
-- Recreate local issues as GitHub issues once the remote repository exists
+- Recreate local issues as GitHub issues once CLI authentication is repaired
 - Supabase integration
 - API key authentication
 - dashboard summary endpoints
@@ -38,13 +38,13 @@ This file is the local fallback tracker until the GitHub repository exists and t
 
 ## Risks / Blockers
 
-- `gh` is installed but the stored token is invalid in this environment, so GitHub repository creation is currently blocked
-- GitHub issue creation depends on the remote repository existing first
-- V0 issue is tracked locally as `AEI-011` until GitHub is available
-- GitHub bootstrap is blocked while V1 implementation proceeds from the local tracker
+- `gh` is installed but the stored token is invalid in this environment, so GitHub issue creation is currently blocked
+- The remote repository exists, but GitHub CLI actions require re-authentication
+- V0 issue is tracked locally as `AEI-011` until GitHub issues are seeded
+- GitHub issue seeding is blocked while V1 implementation proceeds from the local tracker
 
 ## Decisions
 
 - GitHub issues will be the long-term source of truth for work tracking
-- Until the remote exists, `docs/project-status.md` and `docs/issue-register.md` are the fallback source of truth
+- Until GitHub issues are seeded, `docs/project-status.md` and `docs/issue-register.md` are the fallback source of truth
 - The backend loads `.env` from the repository root for local development

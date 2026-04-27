@@ -5,7 +5,8 @@ This document exists so the remote setup can be recovered quickly if the local e
 ## Current Situation
 
 - local Git is initialized
-- local `main` has the bootstrap commit
+- `origin` points to `https://github.com/arwinazizi/ai-energy-intelligence.git`
+- local `main` is expected to track the GitHub remote
 - GitHub CLI is installed
 - GitHub CLI authentication is currently invalid in this environment
 
@@ -19,10 +20,11 @@ gh auth login --web --git-protocol https
 gh auth status
 ```
 
-2. Create the remote repository and attach `origin`:
+2. Verify the existing remote and branch sync:
 
 ```powershell
-gh repo create arwinazizi/ai-energy-intelligence --private --source=. --remote=origin --push --description "Proxy-based measurement layer for AI usage" --disable-wiki
+git remote -v
+git status --branch --short
 ```
 
 3. Create the initial issue set:
@@ -44,5 +46,5 @@ After recovery:
 
 - `gh auth status` should succeed
 - `git remote -v` should show `origin`
-- the GitHub repository should contain the bootstrap commit
+- local `main` should be in sync with `origin/main`
 - the issue list should match `docs/issue-register.md`

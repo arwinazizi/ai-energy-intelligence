@@ -4,11 +4,13 @@ AI Energy Intelligence is a proxy-based measurement layer for AI usage. The V1 t
 
 ## Current Status
 
-This repository is a starter scaffold based on [IMPLEMENTATION.md](./IMPLEMENTATION.md). It now includes:
+This repository is a V1 prototype scaffold based on [IMPLEMENTATION.md](./IMPLEMENTATION.md). It now includes:
 
 - a monorepo-shaped folder structure for backend, dashboard, and shared code
 - architecture and execution docs for the V1 prototype
-- a first Supabase migration skeleton
+- a static V0 dashboard concept in `apps/dashboard`
+- an Express `/openai/*` proxy pass-through in `apps/backend`
+- a first Supabase migration
 - environment and repository hygiene files
 
 ## V1 Success Criteria
@@ -34,10 +36,11 @@ supabase/
 
 ## First Build Order
 
-1. Implement the backend proxy entry point.
-2. Add the OpenAI provider adapter and usage extraction.
+1. Extract model, token usage, endpoint, status code, and latency from non-streaming OpenAI JSON responses.
+2. Add isolated cost, energy, and CO2 calculation logic.
 3. Persist logs and calculated metrics in Supabase.
-4. Build the one-page dashboard on top of `/api/summary` and `/api/recent`.
+4. Add API key validation.
+5. Build summary APIs and wire the dashboard to real data.
 
 ## Key Docs
 
@@ -49,4 +52,4 @@ supabase/
 - [docs/tracking.md](./docs/tracking.md)
 - [docs/v1-build-plan.md](./docs/v1-build-plan.md)
 
-The immediate next implementation step is still the one called out in the roadmap: build the proxy and confirm a single request can be forwarded and logged.
+The immediate next implementation step is AEI-003: usage extraction from proxied OpenAI responses while preserving the upstream response for the client.

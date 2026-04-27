@@ -177,7 +177,7 @@ Dashboard (React)
 
 - React
 - Vite
-- Recharts
+- charting library only if AEI-008 needs it
 
 ### Deployment
 
@@ -441,8 +441,8 @@ Narrative:
 
 ## 20. Next step
 
-Start here:
+The proxy pass-through and V0 static dashboard are complete. Start here:
 
-**build proxy -> send one request -> confirm log**
+**extract usage -> preserve upstream response -> print payload**
 
 Everything else builds on that.

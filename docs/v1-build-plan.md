@@ -26,7 +26,17 @@ Goal: capture real usage metadata from successful responses.
 - measure latency in the proxy layer
 - print extracted payload to console before DB work starts
 
-### Phase 3: Persistence
+### Phase 3: Calculation
+
+Goal: make the logged records meaningful enough for demos before database work starts.
+
+- add shared usage and calculation types
+- calculate input and output cost by model
+- estimate energy from token volume
+- estimate CO2 from energy and chosen carbon intensity
+- wire calculated values into the console usage payload
+
+### Phase 4: Persistence
 
 Goal: store raw usage and derived metrics.
 
@@ -34,7 +44,7 @@ Goal: store raw usage and derived metrics.
 - create async logger
 - insert rows into `usage_logs`
 
-### Phase 4: Auth
+### Phase 5: Auth
 
 Goal: reject unauthorized traffic before proxying.
 
@@ -42,31 +52,42 @@ Goal: reject unauthorized traffic before proxying.
 - hash and compare against `api_keys`
 - keep auth minimal and single-tenant for V1
 
-### Phase 5: Calculation
+### Phase 6: Summary API
 
-Goal: make the logged records meaningful enough for demos.
+Goal: expose stored usage data through small backend DTOs.
 
-- calculate input and output cost by model
-- estimate energy from token volume
-- estimate CO2 from energy and chosen carbon intensity
+- define summary and recent-log DTOs in `packages/shared`
+- expose `GET /api/summary`
+- expose `GET /api/recent`
+- verify empty and populated states
 
-### Phase 6: Dashboard
+### Phase 7: Dashboard UI
 
 Goal: make the flow visible in one page.
 
-- expose `GET /api/summary`
-- expose `GET /api/recent`
 - render totals and a recent logs table
+- handle loading, empty, and error states
+- keep the current visual direction while replacing fake data
+
+### Phase 8: Demo Path
+
+Goal: prove the full local V1 path can be repeated.
+
+- send one OpenAI request through the proxy
+- write one `usage_logs` row
+- show the result on the dashboard
+- document required commands, env vars, expected output, and known limitations
 
 ## First Files To Implement
 
-- `apps/backend/src/index.ts`
 - `apps/backend/src/proxy/openaiProxy.ts`
 - `apps/backend/src/providers/openai.ts`
-- `apps/backend/src/auth/validateApiKey.ts`
-- `apps/backend/src/logging/logUsage.ts`
 - `apps/backend/src/calculator/calculateImpact.ts`
+- `apps/backend/src/logging/logUsage.ts`
+- `apps/backend/src/auth/validateApiKey.ts`
+- `apps/backend/src/api/summary.ts`
+- `packages/shared`
 
 ## Stop Condition For The First Coding Session
 
-Stop as soon as one real request is forwarded and usage is printed correctly. That de-risks the core path before you spend time on the database or UI.
+Stop as soon as one non-streaming OpenAI JSON response is forwarded unchanged and the extracted usage payload is printed correctly. That de-risks the core path before database or UI work starts.

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { IncomingHttpHeaders } from "node:http";
 import http from "node:http";
 import express from "express";
@@ -21,6 +22,8 @@ const clientRequestBody = JSON.stringify({
   model: "gpt-4.1-mini",
   messages: [{ role: "user", content: "smoke" }]
 });
+const validClientApiKey = "client-key-smoke";
+const validClientApiKeyHash = createHash("sha256").update(validClientApiKey).digest("hex");
 
 type SeenRequest = {
   method?: string;
@@ -117,10 +120,20 @@ function createFakeUpstream(seenRequest: SeenRequest): http.Server {
 
 function createFakeSupabase(
   seenInserts: SeenSupabaseInsert[],
+  validKeyHash: string,
   getStatusCode: () => number,
   getResponseBody: () => string
 ): http.Server {
   return http.createServer((req, res) => {
+    if (req.method === "GET" && req.url?.startsWith("/rest/v1/api_keys")) {
+      const requestUrl = new URL(req.url, "http://127.0.0.1");
+
+      res.statusCode = 200;
+      res.setHeader("content-type", "application/json");
+      res.end(requestUrl.searchParams.get("key_hash") === `eq.${validKeyHash}` ? '[{"id":"api-key-id"}]' : "[]");
+      return;
+    }
+
     const chunks: Buffer[] = [];
 
     req.on("data", (chunk: Buffer | string) => {
@@ -172,6 +185,7 @@ let supabaseResponseBody = "";
 const fakeUpstream = createFakeUpstream(seenRequest);
 const fakeSupabase = createFakeSupabase(
   seenSupabaseInserts,
+  validClientApiKeyHash,
   () => supabaseStatusCode,
   () => supabaseResponseBody
 );
@@ -198,7 +212,8 @@ try {
   const response = await fetch(`http://127.0.0.1:${proxyPort}/openai/v1/chat/completions?source=smoke`, {
     method: "POST",
     headers: {
-      "content-type": "application/json"
+      "content-type": "application/json",
+      "x-api-key": validClientApiKey
     },
     body: clientRequestBody
   });
@@ -263,7 +278,8 @@ try {
     {
       method: "POST",
       headers: {
-        "content-type": "application/json"
+        "content-type": "application/json",
+        "x-api-key": validClientApiKey
       },
       body: clientRequestBody
     }

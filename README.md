@@ -13,7 +13,9 @@ This repository is a V1 prototype scaffold based on [IMPLEMENTATION.md](./IMPLEM
 - usage extraction for non-streaming OpenAI JSON responses
 - shared V1 demo calculation logic for `cost_usd`, `energy_kwh`, and `co2_grams`
 - async Supabase persistence for OpenAI usage rows through PostgREST
+- minimal `x-api-key` validation against hashed keys in Supabase before proxying upstream
 - a fake-upstream backend smoke test for usage extraction, calculated impact values, and persistence wiring
+- a fake-upstream backend smoke test for API-key auth and authorized usage logging
 - a first Supabase migration
 - environment and repository hygiene files
 
@@ -56,4 +58,4 @@ supabase/
 - [docs/tracking.md](./docs/tracking.md)
 - [docs/v1-build-plan.md](./docs/v1-build-plan.md)
 
-AEI-003 usage extraction, AEI-004 Supabase persistence, and AEI-006 cost / energy / CO2 calculation are complete. Current task status is tracked in [docs/project-status.md](./docs/project-status.md) and [docs/issue-register.md](./docs/issue-register.md).
+AEI-003 usage extraction, AEI-004 Supabase persistence, AEI-005 API key validation, and AEI-006 cost / energy / CO2 calculation are complete. Current task status is tracked in [docs/project-status.md](./docs/project-status.md) and [docs/issue-register.md](./docs/issue-register.md).

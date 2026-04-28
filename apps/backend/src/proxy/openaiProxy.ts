@@ -3,6 +3,7 @@ import http from "node:http";
 import https from "node:https";
 import type { Request, Response } from "express";
 import { calculateCostEnergyCo2 } from "@aei/shared";
+import { validateApiKey } from "../auth/validateApiKey.js";
 import { logUsage } from "../logging/logUsage.js";
 import { buildOpenAiUrl, getOpenAiApiKey } from "../providers/openai.js";
 import { extractOpenAiUsagePayload } from "./usageExtraction.js";
@@ -30,7 +31,7 @@ function copyHeaders(headers: IncomingHttpHeaders): Record<string, string | stri
     }
 
     const normalizedName = name.toLowerCase();
-    if (HOP_BY_HOP_HEADERS.has(normalizedName) || normalizedName === "host") {
+    if (HOP_BY_HOP_HEADERS.has(normalizedName) || normalizedName === "host" || normalizedName === "x-api-key") {
       continue;
     }
 
@@ -48,7 +49,40 @@ function getRequestBody(req: Request): Buffer | undefined {
   return Buffer.isBuffer(req.body) && req.body.length > 0 ? req.body : undefined;
 }
 
-export function openAiProxy(req: Request, res: Response): void {
+function getClientApiKey(req: Request): string | undefined {
+  const value = req.get("x-api-key")?.trim();
+  return value || undefined;
+}
+
+function sendAuthenticationError(res: Response): void {
+  res.status(401).json({
+    error: {
+      message: "Missing or invalid API key",
+      type: "authentication_error"
+    }
+  });
+}
+
+export async function openAiProxy(req: Request, res: Response): Promise<void> {
+  const clientApiKey = getClientApiKey(req);
+
+  if (!clientApiKey) {
+    sendAuthenticationError(res);
+    return;
+  }
+
+  let isAuthorized = false;
+  try {
+    isAuthorized = await validateApiKey(clientApiKey);
+  } catch (error) {
+    console.warn("API key validation failed", error);
+  }
+
+  if (!isAuthorized) {
+    sendAuthenticationError(res);
+    return;
+  }
+
   const upstreamUrl = buildOpenAiUrl(req.originalUrl);
   const apiKey = getOpenAiApiKey();
   const requestBody = getRequestBody(req);

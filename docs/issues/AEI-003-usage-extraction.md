@@ -23,7 +23,7 @@ Extract usage metadata from non-streaming OpenAI JSON responses while continuing
 - API key authentication
 - Cost, energy, or CO2 calculations
 - Dashboard APIs
-- Streaming response usage extraction
+- Streaming response usage extraction or persistence
 
 ## Acceptance Criteria
 

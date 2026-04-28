@@ -8,6 +8,7 @@ coverage/
 .env
 .env.local
 .env.*.local
+.supabase-project-secrets.json
 *.log
 *.tsbuildinfo
 .codex-edge-profile*/

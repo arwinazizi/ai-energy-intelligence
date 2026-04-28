@@ -68,6 +68,7 @@ Build:
 - Supabase logging
 - real token extraction
 - cost + energy calculation
+- streaming/SSE pass-through without V1 usage logging
 - minimal dashboard
 
 Output:
@@ -97,7 +98,7 @@ Add:
 - multi-tenant system
 - API key management UI
 - Anthropic + others
-- streaming support
+- streaming usage extraction and logging
 - alerts + thresholds
 - better analytics
 
@@ -151,15 +152,17 @@ Dashboard (React)
 3. proxy forwards request
 4. provider processes request (slow step)
 5. provider returns response
-6. proxy extracts:
+6. proxy streams upstream bytes to the client unchanged
+7. for non-streaming JSON responses only, proxy extracts from a bounded tee:
    - tokens
    - model
-7. proxy calculates:
+8. proxy calculates:
    - cost
    - energy
    - CO2
-8. proxy logs asynchronously
-9. proxy returns response unchanged
+9. proxy logs asynchronously after ending the client response
+
+Streaming/SSE responses are pass-through only in V1 and skip usage extraction, calculation, and persistence.
 
 ## 7. Tech stack
 
@@ -237,7 +240,7 @@ CREATE TABLE usage_logs (
   output_tokens INT,
   total_tokens INT GENERATED ALWAYS AS (input_tokens + output_tokens) STORED,
 
-  cost_usd NUMERIC,
+  cost_usd NUMERIC(18, 12),
   energy_kwh NUMERIC,
   co2_grams NUMERIC,
 
@@ -401,6 +404,7 @@ Minimum:
 - manual test script
 - one real API call
 - verify DB insert
+- use `npm.cmd` for workspace scripts on Windows
 
 ## 17. Risks
 
@@ -441,8 +445,8 @@ Narrative:
 
 ## 20. Next step
 
-The proxy pass-through and V0 static dashboard are complete. Start here:
+The proxy pass-through, non-streaming usage extraction, impact calculation, Supabase logging, API-key validation, and streaming/SSE pass-through behavior are complete. Next backend step:
 
-**extract usage -> preserve upstream response -> print payload**
+**summary APIs -> recent logs -> dashboard data**
 
 Everything else builds on that.

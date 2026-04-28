@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import type { IncomingHttpHeaders } from "node:http";
 import http from "node:http";
+import { TextDecoder } from "node:util";
 import express from "express";
 import { openAiProxy } from "../proxy/openaiProxy.js";
 
@@ -21,6 +23,15 @@ const clientRequestBody = JSON.stringify({
   model: "gpt-4.1-mini",
   messages: [{ role: "user", content: "smoke" }]
 });
+const streamingClientRequestBody = JSON.stringify({
+  model: "gpt-4.1-mini",
+  messages: [{ role: "user", content: "stream smoke" }],
+  stream: true
+});
+const sseFirstChunk = 'data: {"delta":"first"}\n\n';
+const sseSecondChunk = 'data: {"delta":"second"}\n\n';
+const validClientApiKey = "client-key-smoke";
+const validClientApiKeyHash = createHash("sha256").update(validClientApiKey).digest("hex");
 
 type SeenRequest = {
   method?: string;
@@ -33,6 +44,10 @@ type SeenSupabaseInsert = {
   url?: string;
   headers: IncomingHttpHeaders;
   body: string;
+};
+
+type StreamingState = {
+  ended: boolean;
 };
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -95,7 +110,7 @@ function close(server: http.Server): Promise<void> {
   });
 }
 
-function createFakeUpstream(seenRequest: SeenRequest): http.Server {
+function createFakeUpstream(seenRequest: SeenRequest, streamingState: StreamingState): http.Server {
   return http.createServer((req, res) => {
     const chunks: Buffer[] = [];
 
@@ -108,6 +123,20 @@ function createFakeUpstream(seenRequest: SeenRequest): http.Server {
       seenRequest.url = req.url;
       seenRequest.body = Buffer.concat(chunks).toString("utf8");
 
+      if (req.url?.includes("source=sse-smoke")) {
+        res.statusCode = 208;
+        res.setHeader("content-type", "text/event-stream");
+        res.setHeader("x-upstream-stream-smoke", "passed");
+        res.write(sseFirstChunk);
+
+        setTimeout(() => {
+          res.write(sseSecondChunk);
+          streamingState.ended = true;
+          res.end();
+        }, 75);
+        return;
+      }
+
       res.statusCode = 207;
       res.setHeader("content-type", "application/json; charset=utf-8");
       res.end(upstreamResponseBody);
@@ -117,10 +146,20 @@ function createFakeUpstream(seenRequest: SeenRequest): http.Server {
 
 function createFakeSupabase(
   seenInserts: SeenSupabaseInsert[],
+  validKeyHash: string,
   getStatusCode: () => number,
   getResponseBody: () => string
 ): http.Server {
   return http.createServer((req, res) => {
+    if (req.method === "GET" && req.url?.startsWith("/rest/v1/api_keys")) {
+      const requestUrl = new URL(req.url, "http://127.0.0.1");
+
+      res.statusCode = 200;
+      res.setHeader("content-type", "application/json");
+      res.end(requestUrl.searchParams.get("key_hash") === `eq.${validKeyHash}` ? '[{"id":"api-key-id"}]' : "[]");
+      return;
+    }
+
     const chunks: Buffer[] = [];
 
     req.on("data", (chunk: Buffer | string) => {
@@ -167,11 +206,13 @@ const consoleLogs: unknown[][] = [];
 const consoleWarnings: unknown[][] = [];
 const seenRequest: SeenRequest = { body: "" };
 const seenSupabaseInserts: SeenSupabaseInsert[] = [];
+const streamingState: StreamingState = { ended: false };
 let supabaseStatusCode = 201;
 let supabaseResponseBody = "";
-const fakeUpstream = createFakeUpstream(seenRequest);
+const fakeUpstream = createFakeUpstream(seenRequest, streamingState);
 const fakeSupabase = createFakeSupabase(
   seenSupabaseInserts,
+  validClientApiKeyHash,
   () => supabaseStatusCode,
   () => supabaseResponseBody
 );
@@ -198,7 +239,8 @@ try {
   const response = await fetch(`http://127.0.0.1:${proxyPort}/openai/v1/chat/completions?source=smoke`, {
     method: "POST",
     headers: {
-      "content-type": "application/json"
+      "content-type": "application/json",
+      "x-api-key": validClientApiKey
     },
     body: clientRequestBody
   });
@@ -263,7 +305,8 @@ try {
     {
       method: "POST",
       headers: {
-        "content-type": "application/json"
+        "content-type": "application/json",
+        "x-api-key": validClientApiKey
       },
       body: clientRequestBody
     }
@@ -282,6 +325,64 @@ try {
   assert(
     (persistenceWarning[1] as Error).message.includes("500"),
     "Expected persistence warning to include Supabase response status"
+  );
+
+  const usageLogCountBeforeStream = consoleLogs.filter((args) => args[0] === "OpenAI usage extracted").length;
+  const usageInsertCountBeforeStream = seenSupabaseInserts.length;
+  const streamResponse = await fetch(
+    `http://127.0.0.1:${proxyPort}/openai/v1/chat/completions?source=sse-smoke`,
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": validClientApiKey
+      },
+      body: streamingClientRequestBody
+    }
+  );
+
+  assert(streamResponse.status === 208, `Expected streaming upstream status 208, received ${streamResponse.status}`);
+  assert(
+    streamResponse.headers.get("content-type") === "text/event-stream",
+    "Streaming content-type header was not preserved"
+  );
+  assert(
+    streamResponse.headers.get("x-upstream-stream-smoke") === "passed",
+    "Streaming upstream header was not preserved"
+  );
+  assert(streamResponse.body, "Expected streaming response body");
+
+  const reader = streamResponse.body.getReader();
+  const decoder = new TextDecoder();
+  const firstRead = await reader.read();
+  assert(!firstRead.done, "Expected first streaming chunk before stream completion");
+
+  const firstChunk = decoder.decode(firstRead.value, { stream: true });
+  assert(firstChunk === sseFirstChunk, "First streaming chunk was not forwarded unchanged");
+  assert(!streamingState.ended, "First streaming chunk was not forwarded before upstream stream ended");
+
+  let streamedBody = firstChunk;
+  while (true) {
+    const nextRead = await reader.read();
+
+    if (nextRead.done) {
+      streamedBody += decoder.decode();
+      break;
+    }
+
+    streamedBody += decoder.decode(nextRead.value, { stream: true });
+  }
+
+  assert(streamingState.ended, "Expected fake upstream streaming response to end");
+  assert(streamedBody === `${sseFirstChunk}${sseSecondChunk}`, "Streaming response body changed");
+  await sleep(50);
+  assert(
+    consoleLogs.filter((args) => args[0] === "OpenAI usage extracted").length === usageLogCountBeforeStream,
+    "Streaming response should not produce a usage extraction log"
+  );
+  assert(
+    seenSupabaseInserts.length === usageInsertCountBeforeStream,
+    "Streaming response should not insert a Supabase usage log"
   );
 
   originalConsoleLog("Usage extraction smoke test passed");

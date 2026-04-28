@@ -4,10 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "npm --workspace @aei/shared run build",
+    "predev": "npm.cmd --workspace @aei/shared run build",
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "presmoke:usage": "npm --workspace @aei/shared run build",
+    "presmoke:auth": "npm.cmd --workspace @aei/shared run build",
+    "smoke:auth": "tsx src/smoke/openaiAuthSmoke.ts",
+    "presmoke:usage": "npm.cmd --workspace @aei/shared run build",
     "smoke:usage": "tsx src/smoke/openaiUsageExtractionSmoke.ts",
     "start": "node dist/index.js"
   },

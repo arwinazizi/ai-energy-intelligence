@@ -22,8 +22,8 @@ Compute V1 cost, energy, and CO2 estimates from extracted OpenAI usage payloads 
 - API key authentication
 - Dashboard APIs
 - Dashboard UI
-- DB schema changes
-- Streaming response support
+- DB schema changes during the original calculator task; cost precision was later fixed under AEI-012
+- Streaming response usage extraction or persistence
 - Live OpenAI-dependent tests
 
 ## Default Constants

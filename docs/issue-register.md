@@ -16,6 +16,7 @@ This is the bootstrap issue ledger before GitHub issue numbers exist. When the G
 | AEI-009 | Todo | Smoke Test And Demo Path | Prove one request flows through proxy to log to dashboard. | Pending |
 | AEI-010 | Blocked | GitHub Bootstrap | Repair `gh` auth, create remote, push `main`, and seed issues. | Pending |
 | AEI-011 | Done | V0 Static Concept Demo | Build a static React page that explains the measurement-layer idea with fake data and architecture. | Pending |
+| AEI-012 | Done | Review Fixes: Streaming Proxy / Cost Precision / Windows Scripts | Address review findings for safe streaming pass-through, Supabase cost precision, and Windows npm scripts. | Pending |
 
 ## Rules
 

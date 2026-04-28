@@ -2,9 +2,10 @@
 
 ## Definition Of Done
 
-- One OpenAI request can be sent through the proxy.
+- One non-streaming OpenAI JSON request can be sent through the proxy.
 - The proxy returns the upstream response without reshaping it.
 - A `usage_logs` row is written with tokens, latency, cost, energy, and CO2.
+- Streaming/SSE responses are forwarded unchanged and are not logged in V1.
 - The dashboard shows `GET /api/summary` and `GET /api/recent`.
 
 ## Execution Order
@@ -17,6 +18,7 @@ Goal: prove the proxy can forward requests safely.
 - add `/openai/*` route
 - forward headers and body upstream
 - return status and body unchanged
+- stream upstream response bytes to the client with backpressure handling
 
 ### Phase 2: Usage Extraction
 
@@ -25,6 +27,7 @@ Goal: capture real usage metadata from successful responses.
 - parse model and token usage from OpenAI responses
 - measure latency in the proxy layer
 - print extracted payload to console before DB work starts
+- skip extraction for streaming/SSE responses in V1
 
 ### Phase 3: Calculation
 
@@ -41,6 +44,7 @@ Goal: make the logged records meaningful enough for demos before database work s
 Goal: store raw usage and derived metrics.
 
 - apply `supabase/migrations/0001_v1_init.sql`
+- preserve `cost_usd` with 12 decimal places in the schema
 - create async logger
 - insert rows into `usage_logs`
 

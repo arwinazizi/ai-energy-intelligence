@@ -21,6 +21,8 @@ const HOP_BY_HOP_HEADERS = new Set([
 ]);
 
 const REQUEST_BODYLESS_METHODS = new Set(["GET", "HEAD"]);
+const MAX_USAGE_EXTRACTION_RESPONSE_BYTES = 1_000_000;
+const MAX_STREAM_INTENT_REQUEST_BYTES = 1_000_000;
 
 function copyHeaders(headers: IncomingHttpHeaders): Record<string, string | string[]> {
   const copiedHeaders: Record<string, string | string[]> = {};
@@ -52,6 +54,39 @@ function getRequestBody(req: Request): Buffer | undefined {
 function getClientApiKey(req: Request): string | undefined {
   const value = req.get("x-api-key")?.trim();
   return value || undefined;
+}
+
+function headerIncludes(headers: IncomingHttpHeaders, name: string, expectedValue: string): boolean {
+  const value = headers[name.toLowerCase()];
+  const values = Array.isArray(value) ? value : [value];
+  const normalizedExpectedValue = expectedValue.toLowerCase();
+
+  return values.some((entry) => typeof entry === "string" && entry.toLowerCase().includes(normalizedExpectedValue));
+}
+
+function isJsonResponse(headers: IncomingHttpHeaders): boolean {
+  return headerIncludes(headers, "content-type", "json");
+}
+
+function isSseResponse(headers: IncomingHttpHeaders): boolean {
+  return headerIncludes(headers, "content-type", "text/event-stream");
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasStreamingRequestIntent(requestBody: Buffer | undefined): boolean {
+  if (!requestBody || requestBody.length > MAX_STREAM_INTENT_REQUEST_BYTES) {
+    return false;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(requestBody.toString("utf8"));
+    return isObject(parsed) && parsed.stream === true;
+  } catch {
+    return false;
+  }
 }
 
 function sendAuthenticationError(res: Response): void {
@@ -88,6 +123,7 @@ export async function openAiProxy(req: Request, res: Response): Promise<void> {
   const requestBody = getRequestBody(req);
   const headers = copyHeaders(req.headers);
   const startedAt = Date.now();
+  const requestHasStreamingIntent = hasStreamingRequestIntent(requestBody);
 
   if (apiKey && !headers.authorization) {
     headers.authorization = `Bearer ${apiKey}`;
@@ -108,7 +144,11 @@ export async function openAiProxy(req: Request, res: Response): Promise<void> {
     },
     (upstreamResponse) => {
       const statusCode = upstreamResponse.statusCode || 502;
+      const shouldExtractUsage =
+        !requestHasStreamingIntent && !isSseResponse(upstreamResponse.headers) && isJsonResponse(upstreamResponse.headers);
       const responseChunks: Buffer[] = [];
+      let collectedBytes = 0;
+      let responseTooLargeForExtraction = false;
 
       for (const [name, value] of Object.entries(upstreamResponse.headers)) {
         if (!value || HOP_BY_HOP_HEADERS.has(name.toLowerCase())) {
@@ -118,12 +158,44 @@ export async function openAiProxy(req: Request, res: Response): Promise<void> {
         res.setHeader(name, value);
       }
 
+      res.statusCode = statusCode;
+
       upstreamResponse.on("data", (chunk: Buffer | string) => {
-        responseChunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        if (shouldExtractUsage && !responseTooLargeForExtraction) {
+          const bufferChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+          const nextCollectedBytes = collectedBytes + bufferChunk.length;
+
+          if (nextCollectedBytes > MAX_USAGE_EXTRACTION_RESPONSE_BYTES) {
+            responseChunks.length = 0;
+            collectedBytes = 0;
+            responseTooLargeForExtraction = true;
+          } else {
+            responseChunks.push(bufferChunk);
+            collectedBytes = nextCollectedBytes;
+          }
+        }
+
+        if (res.destroyed) {
+          upstreamResponse.destroy();
+          return;
+        }
+
+        if (!res.write(chunk)) {
+          upstreamResponse.pause();
+          res.once("drain", () => {
+            upstreamResponse.resume();
+          });
+        }
       });
 
       upstreamResponse.on("end", () => {
-        const responseBody = Buffer.concat(responseChunks);
+        res.end();
+
+        if (!shouldExtractUsage || responseTooLargeForExtraction) {
+          return;
+        }
+
+        const responseBody = Buffer.concat(responseChunks, collectedBytes);
         const usagePayload = extractOpenAiUsagePayload({
           endpoint: upstreamUrl.pathname,
           statusCode,
@@ -131,29 +203,32 @@ export async function openAiProxy(req: Request, res: Response): Promise<void> {
           headers: upstreamResponse.headers,
           body: responseBody
         });
-        const usageLog = usagePayload
-          ? {
-              provider: "openai" as const,
-              ...usagePayload,
-              ...calculateCostEnergyCo2(usagePayload)
-            }
-          : undefined;
 
-        if (usageLog) {
-          console.log("OpenAI usage extracted", usageLog);
+        if (!usagePayload) {
+          return;
         }
 
-        res.status(statusCode).end(responseBody);
+        const usageLog = {
+          provider: "openai" as const,
+          ...usagePayload,
+          ...calculateCostEnergyCo2(usagePayload)
+        };
 
-        if (usageLog) {
-          void logUsage(usageLog).catch((error: unknown) => {
-            console.warn("OpenAI usage persistence failed", error);
-          });
-        }
+        console.log("OpenAI usage extracted", usageLog);
+
+        void logUsage(usageLog).catch((error: unknown) => {
+          console.warn("OpenAI usage persistence failed", error);
+        });
       });
 
       upstreamResponse.on("error", (error) => {
         res.destroy(error);
+      });
+
+      res.on("close", () => {
+        if (!res.writableEnded) {
+          upstreamResponse.destroy();
+        }
       });
     }
   );

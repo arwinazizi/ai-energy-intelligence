@@ -22,7 +22,7 @@ Persist extracted OpenAI usage rows and calculated impact values to Supabase wit
 - Dashboard APIs
 - Dashboard UI
 - Summary queries
-- Streaming response support
+- Streaming response usage extraction or persistence
 - Live Supabase-dependent tests
 
 ## Acceptance Criteria

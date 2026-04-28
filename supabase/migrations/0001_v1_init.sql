@@ -17,7 +17,7 @@ create table if not exists public.usage_logs (
   input_tokens integer not null default 0,
   output_tokens integer not null default 0,
   total_tokens integer generated always as (input_tokens + output_tokens) stored,
-  cost_usd numeric(12, 6) not null default 0,
+  cost_usd numeric(18, 12) not null default 0,
   energy_kwh numeric(12, 9) not null default 0,
   co2_grams numeric(12, 6) not null default 0,
   latency_ms integer,

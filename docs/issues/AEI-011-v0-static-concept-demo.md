@@ -23,4 +23,4 @@ Build a static React page that explains the AI Energy Intelligence concept befor
 
 ## GitHub
 
-Pending. Recreate this as a GitHub issue when the remote repository exists.
+Tracked in GitHub issue #13. Closed as completed.

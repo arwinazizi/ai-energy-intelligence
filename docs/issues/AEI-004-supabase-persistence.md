@@ -43,4 +43,4 @@ Persist extracted OpenAI usage rows and calculated impact values to Supabase wit
 
 ## GitHub
 
-Pending. Recreate this as a GitHub issue when GitHub issue seeding is available.
+Tracked in GitHub issue #6. Closed as completed.

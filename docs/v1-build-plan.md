@@ -82,15 +82,18 @@ Goal: prove the full local V1 path can be repeated.
 - show the result on the dashboard
 - document required commands, env vars, expected output, and known limitations
 
-## First Files To Implement
+## Key Implementation Files
 
 - `apps/backend/src/proxy/openaiProxy.ts`
 - `apps/backend/src/providers/openai.ts`
-- `apps/backend/src/calculator/calculateImpact.ts`
 - `apps/backend/src/logging/logUsage.ts`
 - `apps/backend/src/auth/validateApiKey.ts`
+- `apps/backend/src/db/supabase.ts`
+- `packages/shared/src/usageImpact.ts`
+
+Next planned API file:
+
 - `apps/backend/src/api/summary.ts`
-- `packages/shared`
 
 ## Stop Condition For The First Coding Session
 

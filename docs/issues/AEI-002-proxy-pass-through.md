@@ -37,4 +37,4 @@ Forward one real OpenAI request through the Express backend and return the upstr
 
 ## GitHub
 
-Pending. Recreate this as a GitHub issue when the remote repository exists.
+Tracked in GitHub issue #4. Closed as completed.

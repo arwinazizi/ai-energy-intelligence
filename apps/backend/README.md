@@ -7,7 +7,7 @@ The backend owns the V1 critical path:
 - extract usage and latency
 - calculate cost, energy, and CO2
 - log asynchronously
-- expose summary endpoints for the dashboard
+- expose summary endpoints for the dashboard in the next V1 phase
 
 ## Current Proxy Pass-Through
 
@@ -51,13 +51,17 @@ Run the backend build, including the shared calculator package:
 npm.cmd run build:backend
 ```
 
-## Suggested First Files
+## Current Key Files
 
 - `src/index.ts`
 - `src/proxy/openaiProxy.ts`
 - `src/providers/openai.ts`
 - `src/auth/validateApiKey.ts`
 - `src/logging/logUsage.ts`
-- `src/calculator/calculateImpact.ts`
-- `src/api/summary.ts`
 - `src/db/supabase.ts`
+- `../../packages/shared/src/usageImpact.ts`
+
+## Next Planned Files
+
+- `src/api/summary.ts`
+- shared summary and recent-log DTOs in `../../packages/shared/src`

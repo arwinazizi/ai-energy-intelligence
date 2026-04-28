@@ -194,16 +194,20 @@ ai-energy-intelligence/
 
 apps/
   backend/
-    proxy/
-    logging/
-    calculator/
-    api/
-    db/
+    src/
+      auth/
+      db/
+      logging/
+      providers/
+      proxy/
+      smoke/
 
   dashboard/
+    src/
 
 packages/
   shared/
+    src/
 
 supabase/
   migrations/
@@ -391,7 +395,7 @@ Environment variables:
 
 - `OPENAI_API_KEY`
 - `SUPABASE_URL`
-- `SUPABASE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
 ### Frontend
 

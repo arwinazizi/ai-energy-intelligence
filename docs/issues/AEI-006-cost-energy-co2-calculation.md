@@ -57,4 +57,4 @@ Pricing defaults were checked against OpenAI-published GPT-4.1 series pricing on
 
 ## GitHub
 
-Pending. Recreate this as a GitHub issue when GitHub issue seeding is available.
+Tracked in GitHub issue #8. Closed as completed.

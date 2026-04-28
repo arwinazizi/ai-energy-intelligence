@@ -41,4 +41,4 @@ Extract usage metadata from non-streaming OpenAI JSON responses while continuing
 
 ## GitHub
 
-Pending. Recreate this as a GitHub issue when GitHub issue seeding is available.
+Tracked in GitHub issue #5. Closed as completed.

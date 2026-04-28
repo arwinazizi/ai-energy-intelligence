@@ -36,7 +36,7 @@ The tracker issue should always contain these sections:
 - Risks / Blockers
 - Decisions
 
-If the tracker issue is current, a fresh read of that one issue plus the open issue list is enough to recover context.
+If tracker issue #2 is current, a fresh read of that one issue plus the open issue list is enough to recover context.
 
 ## Initial Issue Taxonomy
 
@@ -52,5 +52,6 @@ If context is lost, read these in order:
 1. `README.md`
 2. `IMPLEMENTATION.md`
 3. `docs/tracking.md`
-4. the tracker issue
-5. open issues sorted by update time
+4. GitHub tracker issue #2
+5. open GitHub issues sorted by update time
+6. `docs/project-status.md` and `docs/issue-register.md` as local mirrors

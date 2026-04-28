@@ -6,13 +6,14 @@ This document exists so the remote setup can be recovered quickly if the local e
 
 - local Git is initialized
 - `origin` points to `https://github.com/arwinazizi/ai-energy-intelligence.git`
-- local `main` is expected to track the GitHub remote
+- local `main` tracks the GitHub remote
+- GitHub tracker, V1 epic, and task issues have been seeded
 - GitHub CLI is installed
 - GitHub CLI authentication is currently invalid in this environment
 
 ## Recovery Steps
 
-1. Re-authenticate GitHub CLI:
+1. Re-authenticate GitHub CLI when CLI-only actions are needed:
 
 ```powershell
 gh auth logout -h github.com -u arwinazizi
@@ -27,7 +28,7 @@ git remote -v
 git status --branch --short
 ```
 
-3. Create the initial issue set:
+3. Verify the initial issue set exists:
 
 - Program Tracker
 - V1 Prototype Epic
@@ -39,6 +40,7 @@ git status --branch --short
 - Summary API
 - Dashboard UI
 - Smoke Test And Demo Path
+- GitHub CLI Auth Cleanup
 
 ## Verification
 

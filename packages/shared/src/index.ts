@@ -3,6 +3,11 @@ export {
   calculateCostEnergyCo2
 } from "./usageImpact.js";
 export type {
+  RecentUsageLogDto,
+  RecentUsageLogsResponseDto,
+  UsageSummaryDto
+} from "./dashboardData.js";
+export type {
   CalculatedUsageImpact,
   CostEnergyCo2CalculationConstants,
   ModelTokenPricingUsd,

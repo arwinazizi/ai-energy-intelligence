@@ -7,7 +7,7 @@ The backend owns the V1 critical path:
 - extract usage and latency
 - calculate cost, energy, and CO2
 - log asynchronously
-- expose summary endpoints for the dashboard in the next V1 phase
+- expose summary endpoints for the dashboard
 
 ## Current Proxy Pass-Through
 
@@ -29,7 +29,16 @@ Requests to `/openai/v1/...` are forwarded to `https://api.openai.com/v1/...` by
 
 The proxy validates the client `x-api-key` before proxying by hashing it with SHA-256 and checking `public.api_keys.key_hash` through Supabase PostgREST. Missing or invalid keys receive a small JSON 401 response and do not reach the upstream. Authorized requests preserve the upstream status code, headers, and raw response body for the client.
 
-The proxy extracts usage payloads from non-streaming OpenAI JSON responses, calculates V1 demo estimates for `cost_usd`, `energy_kwh`, and `co2_grams` from `@aei/shared`, logs the payload to the console, and asynchronously persists it to Supabase `public.usage_logs` using `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Persistence failures are console warnings only and do not alter the upstream response. Streaming/SSE responses are forwarded as pass-through bytes only and are not logged in V1. Dashboard APIs, dashboard UI, key management UI, and streaming usage extraction are still out of scope.
+The proxy extracts usage payloads from non-streaming OpenAI JSON responses, calculates V1 demo estimates for `cost_usd`, `energy_kwh`, and `co2_grams` from `@aei/shared`, logs the payload to the console, and asynchronously persists it to Supabase `public.usage_logs` using `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Persistence failures are console warnings only and do not alter the upstream response. Streaming/SSE responses are forwarded as pass-through bytes only and are not logged in V1. Dashboard UI, key management UI, and streaming usage extraction are still out of scope.
+
+The backend also exposes read-only dashboard data endpoints:
+
+```text
+GET /api/summary
+GET /api/recent
+```
+
+`/api/summary` returns aggregate request, token, cost, energy, and CO2 totals. `/api/recent` returns the 10 newest `usage_logs` rows with provider, model, endpoint, token counts, estimates, latency, status code, and creation time. Empty databases return zero totals and an empty recent list.
 
 The Supabase schema stores `usage_logs.cost_usd` as `numeric(18, 12)` so the 12-decimal calculator output is preserved. Use `npm.cmd` for workspace scripts on Windows.
 
@@ -45,6 +54,12 @@ Run the focused fake-upstream API-key auth smoke test:
 npm.cmd --workspace @aei/backend run smoke:auth
 ```
 
+Run the fake-Supabase Summary API smoke test:
+
+```bash
+npm.cmd --workspace @aei/backend run smoke:summary
+```
+
 Run the backend build, including the shared calculator package:
 
 ```bash
@@ -58,10 +73,7 @@ npm.cmd run build:backend
 - `src/providers/openai.ts`
 - `src/auth/validateApiKey.ts`
 - `src/logging/logUsage.ts`
-- `src/db/supabase.ts`
-- `../../packages/shared/src/usageImpact.ts`
-
-## Next Planned Files
-
 - `src/api/summary.ts`
-- shared summary and recent-log DTOs in `../../packages/shared/src`
+- `src/db/supabase.ts`
+- `../../packages/shared/src/dashboardData.ts`
+- `../../packages/shared/src/usageImpact.ts`

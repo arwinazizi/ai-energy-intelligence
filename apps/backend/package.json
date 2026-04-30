@@ -11,6 +11,8 @@
     "smoke:auth": "tsx src/smoke/openaiAuthSmoke.ts",
     "presmoke:usage": "npm.cmd --workspace @aei/shared run build",
     "smoke:usage": "tsx src/smoke/openaiUsageExtractionSmoke.ts",
+    "presmoke:summary": "npm.cmd --workspace @aei/shared run build",
+    "smoke:summary": "tsx src/smoke/summaryApiSmoke.ts",
     "start": "node dist/index.js"
   },
   "dependencies": {

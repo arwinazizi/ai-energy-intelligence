@@ -34,6 +34,10 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Updated `usage_logs.cost_usd` to `numeric(18, 12)` for fresh and existing Supabase installs
 - Changed workspace npm scripts to use `npm.cmd` on Windows
 - Seeded GitHub tracker, V1 epic, and task issues from the local issue register
+- Added shared dashboard DTOs for summary totals and recent usage logs
+- Exposed `GET /api/summary` for aggregate request, token, cost, energy, and CO2 totals from Supabase `usage_logs`
+- Exposed `GET /api/recent` for the newest usage log rows with provider, model, endpoint, tokens, estimates, latency, status, and creation time
+- Added fake-Supabase smoke coverage for empty and populated Summary API states
 
 ## In Progress
 
@@ -41,11 +45,10 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 
 ## Next
 
-- AEI-007 / GitHub #9: Summary API
+- AEI-008 / GitHub #10: Dashboard UI
 
 ## Later
 
-- AEI-008 / GitHub #10: Dashboard UI
 - AEI-009 / GitHub #11: Smoke Test And Demo Path
 - AEI-010 / GitHub #12: Re-authenticate local GitHub CLI for CLI-only workflows
 
@@ -64,3 +67,4 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - V1 API keys are stored as SHA-256 hex hashes in `public.api_keys.key_hash` and are sent by clients with `x-api-key`
 - Streaming/SSE OpenAI responses are pass-through only and are not logged in V1
 - `usage_logs.cost_usd` preserves the calculator's 12-decimal output in Supabase
+- V1 dashboard data APIs are read-only and unauthenticated; dashboard auth remains out of scope

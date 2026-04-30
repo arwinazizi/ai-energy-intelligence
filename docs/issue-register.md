@@ -11,7 +11,7 @@ This is the local mirror of the GitHub issue tracker. GitHub issues are the sour
 | AEI-004 | Done | Supabase Persistence | Insert usage rows for extracted usage and calculated impact values. | #6 |
 | AEI-005 | Done | API Key Validation | Validate a shared API key via hashed lookup. | #7 |
 | AEI-006 | Done | Cost / Energy / CO2 Calculation | Compute V1 estimates from usage events. | #8 |
-| AEI-007 | Todo | Summary API | Expose `GET /api/summary` and `GET /api/recent`. | #9 |
+| AEI-007 | Done | Summary API | Expose `GET /api/summary` and `GET /api/recent`. | #9 |
 | AEI-008 | Todo | Dashboard UI | Render summary cards and recent logs table. | #10 |
 | AEI-009 | Todo | Smoke Test And Demo Path | Prove one request flows through proxy to log to dashboard. | #11 |
 | AEI-010 | Blocked | GitHub CLI Auth Cleanup | Re-authenticate local `gh` for CLI-only GitHub workflows. | #12 |

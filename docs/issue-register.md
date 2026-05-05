@@ -5,7 +5,7 @@ This is the local mirror of the GitHub issue tracker. GitHub issues are the sour
 | Local ID | Status | Title | Purpose | GitHub Issue |
 | --- | --- | --- | --- | --- |
 | AEI-000 | In Progress | Program Tracker | Single place to read done, doing, next, blockers, and decisions. | #2 |
-| AEI-001 | Todo | V1 Prototype Epic | Own the end-to-end V1 scope. | #3 |
+| AEI-001 | Done | V1 Prototype Epic | Own the end-to-end V1 scope. | #3 |
 | AEI-002 | Done | Proxy Pass-Through | Forward one real OpenAI request unchanged through Express. | #4 |
 | AEI-003 | Done | Usage Extraction | Parse model, tokens, and latency from OpenAI responses. | #5 |
 | AEI-004 | Done | Supabase Persistence | Insert usage rows for extracted usage and calculated impact values. | #6 |

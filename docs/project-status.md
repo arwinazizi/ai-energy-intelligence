@@ -42,6 +42,7 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Added a live AEI-009 demo smoke command that sends one non-streaming OpenAI request through the proxy and verifies the new data through `/api/summary` and `/api/recent`
 - Documented the full local V1 demo path, required environment variables, Supabase API-key setup, and dashboard refresh step
 - Verified the full V1 demo path with one real OpenAI request, one Supabase `usage_logs` row, and the dashboard showing the new recent usage row
+- Completed the V1 prototype epic locally; the remaining work is tracker/release cleanup and V2 task selection
 
 ## In Progress
 
@@ -49,7 +50,7 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 
 ## Next
 
-- No implementation task selected
+- Select the first V2 pilot-ready MVP task before starting new implementation work
 
 ## Later
 

@@ -1,10 +1,10 @@
 # AI Energy Intelligence
 
-AI Energy Intelligence is a proxy-based measurement layer for AI usage. The V1 target is straightforward: send one real OpenAI request through a proxy, extract usage, estimate cost and environmental impact, store it in Supabase, and expose the result in a minimal dashboard.
+AI Energy Intelligence is a proxy-based measurement layer for AI usage. The V1 prototype proves the core flow: send one real OpenAI request through a proxy, extract usage, estimate cost and environmental impact, store it in Supabase, and expose the result in a minimal dashboard.
 
 ## Current Status
 
-This repository is a V1 prototype scaffold based on [IMPLEMENTATION.md](./IMPLEMENTATION.md). It now includes:
+This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md). It includes:
 
 - a monorepo-shaped folder structure for backend, dashboard, and shared code
 - architecture and execution docs for the V1 prototype
@@ -17,6 +17,9 @@ This repository is a V1 prototype scaffold based on [IMPLEMENTATION.md](./IMPLEM
 - a fake-upstream backend smoke test for usage extraction, calculated impact values, and persistence wiring
 - minimal `x-api-key` validation against hashed keys in Supabase before proxying upstream
 - a fake-upstream backend smoke test for API-key auth and authorized usage logging
+- read-only summary APIs for totals and recent usage logs
+- a V1 dashboard wired to the backend summary and recent-log APIs
+- a repeatable demo smoke path for request -> Supabase row -> dashboard verification
 - Supabase migrations with `cost_usd` stored as `numeric(18, 12)`
 - Windows-safe `npm.cmd` workspace scripts
 - environment and repository hygiene files
@@ -43,7 +46,7 @@ supabase/
   migrations/
 ```
 
-## First Build Order
+## Completed V1 Build Path
 
 1. Extract model, token usage, endpoint, status code, and latency from non-streaming OpenAI JSON responses.
 2. Add isolated cost, energy, and CO2 calculation logic.
@@ -51,6 +54,12 @@ supabase/
 4. Add API key validation.
 5. Build summary APIs and wire the dashboard to real data.
 6. Keep streaming/SSE responses as pass-through only until streaming usage extraction is scoped.
+
+## Remaining Closeout
+
+- Keep GitHub tracker issue #2 aligned with the local project status.
+- Keep AEI-010 / GitHub issue #12 blocked until local GitHub CLI auth can be re-established.
+- Select the first V2 pilot-ready MVP issue before starting new implementation work.
 
 ## Key Docs
 
@@ -63,4 +72,4 @@ supabase/
 - [docs/v1-build-plan.md](./docs/v1-build-plan.md)
 - [docs/v1-demo-path.md](./docs/v1-demo-path.md)
 
-AEI-003 usage extraction, AEI-004 Supabase persistence, AEI-005 API key validation, AEI-006 cost / energy / CO2 calculation, and AEI-012 review fixes are complete. Current task status is tracked in GitHub issue #2 and mirrored in [docs/project-status.md](./docs/project-status.md) and [docs/issue-register.md](./docs/issue-register.md).
+Current task status is tracked in GitHub issue #2 and mirrored in [docs/project-status.md](./docs/project-status.md) and [docs/issue-register.md](./docs/issue-register.md).

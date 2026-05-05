@@ -14,7 +14,7 @@ This is the local mirror of the GitHub issue tracker. GitHub issues are the sour
 | AEI-007 | Done | Summary API | Expose `GET /api/summary` and `GET /api/recent`. | #9 |
 | AEI-008 | Done | Dashboard UI | Render summary cards and recent logs table. | #10 |
 | AEI-009 | Done | Smoke Test And Demo Path | Prove one request flows through proxy to log to dashboard. | #11 |
-| AEI-010 | Blocked | GitHub CLI Auth Cleanup | Re-authenticate local `gh` for CLI-only GitHub workflows. | #12 |
+| AEI-010 | Done | GitHub CLI Auth Cleanup | Re-authenticate local `gh` for CLI-only GitHub workflows. | #12 |
 | AEI-011 | Done | V0 Static Concept Demo | Build a static React page that explains the measurement-layer idea with fake data and architecture. | #13 |
 | AEI-012 | Done | Review Fixes: Streaming Proxy / Cost Precision / Windows Scripts | Address review findings for safe streaming pass-through, Supabase cost precision, and Windows npm scripts. | #14 |
 

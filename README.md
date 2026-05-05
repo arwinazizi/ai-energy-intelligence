@@ -22,6 +22,7 @@ This repository contains the completed V1 working prototype based on [IMPLEMENTA
 - a repeatable demo smoke path for request -> Supabase row -> dashboard verification
 - Supabase migrations with `cost_usd` stored as `numeric(18, 12)`
 - Windows-safe `npm.cmd` workspace scripts
+- restored local GitHub CLI authentication for CLI-only GitHub workflows
 - environment and repository hygiene files
 
 ## V1 Success Criteria
@@ -58,7 +59,6 @@ supabase/
 ## Remaining Closeout
 
 - Keep GitHub tracker issue #2 aligned with the local project status.
-- Keep AEI-010 / GitHub issue #12 blocked until local GitHub CLI auth can be re-established.
 - Select the first V2 pilot-ready MVP issue before starting new implementation work.
 
 ## Key Docs

@@ -43,6 +43,7 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Documented the full local V1 demo path, required environment variables, Supabase API-key setup, and dashboard refresh step
 - Verified the full V1 demo path with one real OpenAI request, one Supabase `usage_logs` row, and the dashboard showing the new recent usage row
 - Completed the V1 prototype epic locally; the remaining work is tracker/release cleanup and V2 task selection
+- Restored local GitHub CLI authentication for `arwinazizi` using GitHub CLI plain-file credential storage after the Windows credential-store login flow failed to persist a readable token
 
 ## In Progress
 
@@ -53,13 +54,12 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Select the first V2 pilot-ready MVP task before starting new implementation work
 
 ## Later
-
-- AEI-010 / GitHub #12: Re-authenticate local GitHub CLI for CLI-only workflows
+- No deferred local admin tasks are currently tracked.
 
 ## Risks / Blockers
 
-- `gh` is installed but the stored token is invalid in this environment, so CLI-only GitHub actions require re-authentication
-- The GitHub connector can manage repository issues and PR metadata despite the local `gh` token problem
+- GitHub CLI credentials are stored in `C:\Users\Arwin\AppData\Roaming\GitHub CLI\hosts.yml` because the normal Windows credential-store login flow did not persist a readable token
+- No active GitHub CLI authentication blocker remains.
 
 ## Decisions
 

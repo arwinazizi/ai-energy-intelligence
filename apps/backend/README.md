@@ -60,6 +60,14 @@ Run the fake-Supabase Summary API smoke test:
 npm.cmd --workspace @aei/backend run smoke:summary
 ```
 
+Run the live AEI-009 demo smoke after starting the backend with real OpenAI and Supabase credentials:
+
+```bash
+npm.cmd --workspace @aei/backend run smoke:demo
+```
+
+This sends one non-streaming OpenAI request through `/openai/v1/chat/completions` with `AEI_CLIENT_API_KEY`, then verifies the new data through `/api/summary` and `/api/recent`. See `../../docs/v1-demo-path.md` for the full command path and Supabase API-key setup.
+
 Run the backend build, including the shared calculator package:
 
 ```bash

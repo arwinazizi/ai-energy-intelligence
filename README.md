@@ -61,5 +61,6 @@ supabase/
 - [docs/github-bootstrap.md](./docs/github-bootstrap.md)
 - [docs/tracking.md](./docs/tracking.md)
 - [docs/v1-build-plan.md](./docs/v1-build-plan.md)
+- [docs/v1-demo-path.md](./docs/v1-demo-path.md)
 
 AEI-003 usage extraction, AEI-004 Supabase persistence, AEI-005 API key validation, AEI-006 cost / energy / CO2 calculation, and AEI-012 review fixes are complete. Current task status is tracked in GitHub issue #2 and mirrored in [docs/project-status.md](./docs/project-status.md) and [docs/issue-register.md](./docs/issue-register.md).

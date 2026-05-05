@@ -38,6 +38,10 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Exposed `GET /api/summary` for aggregate request, token, cost, energy, and CO2 totals from Supabase `usage_logs`
 - Exposed `GET /api/recent` for the newest usage log rows with provider, model, endpoint, tokens, estimates, latency, status, and creation time
 - Added fake-Supabase smoke coverage for empty and populated Summary API states
+- Built the AEI-008 dashboard UI with summary cards, recent usage table, loading, empty, and error states against the backend V1 APIs
+- Added a live AEI-009 demo smoke command that sends one non-streaming OpenAI request through the proxy and verifies the new data through `/api/summary` and `/api/recent`
+- Documented the full local V1 demo path, required environment variables, Supabase API-key setup, and dashboard refresh step
+- Verified the full V1 demo path with one real OpenAI request, one Supabase `usage_logs` row, and the dashboard showing the new recent usage row
 
 ## In Progress
 
@@ -45,11 +49,10 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 
 ## Next
 
-- AEI-008 / GitHub #10: Dashboard UI
+- No implementation task selected
 
 ## Later
 
-- AEI-009 / GitHub #11: Smoke Test And Demo Path
 - AEI-010 / GitHub #12: Re-authenticate local GitHub CLI for CLI-only workflows
 
 ## Risks / Blockers

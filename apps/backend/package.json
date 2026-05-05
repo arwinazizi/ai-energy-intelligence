@@ -13,6 +13,7 @@
     "smoke:usage": "tsx src/smoke/openaiUsageExtractionSmoke.ts",
     "presmoke:summary": "npm.cmd --workspace @aei/shared run build",
     "smoke:summary": "tsx src/smoke/summaryApiSmoke.ts",
+    "smoke:demo": "tsx src/smoke/openaiDemoSmoke.ts",
     "start": "node dist/index.js"
   },
   "dependencies": {

@@ -12,6 +12,7 @@ coverage/
 *.log
 *.tsbuildinfo
 .codex-edge-profile*/
+.codex/
 *-screenshot.png
 v0-dashboard-*.png
 .DS_Store

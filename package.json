@@ -13,7 +13,7 @@
     "build:shared": "npm.cmd --workspace @aei/shared run build",
     "build:backend": "npm.cmd --workspace @aei/shared run build && npm.cmd --workspace @aei/backend run build",
     "dev:dashboard": "npm.cmd --workspace @aei/dashboard run dev",
-    "build:dashboard": "npm.cmd --workspace @aei/dashboard run build",
+    "build:dashboard": "npm.cmd --workspace @aei/shared run build && npm.cmd --workspace @aei/dashboard run build",
     "preview:dashboard": "npm.cmd --workspace @aei/dashboard run preview"
   }
 }

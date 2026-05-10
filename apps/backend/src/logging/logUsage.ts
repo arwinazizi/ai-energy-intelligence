@@ -4,10 +4,12 @@ import type { OpenAiUsagePayload } from "../proxy/usageExtraction.js";
 
 export type UsageLogInput = OpenAiUsagePayload &
   CalculatedUsageImpact & {
+    organizationId: string;
     provider: "openai";
   };
 
 type UsageLogInsertRow = {
+  organization_id: string;
   provider: string;
   model: string | null;
   endpoint: string;
@@ -22,6 +24,7 @@ type UsageLogInsertRow = {
 
 function toInsertRow(input: UsageLogInput): UsageLogInsertRow {
   return {
+    organization_id: input.organizationId,
     provider: input.provider,
     model: input.model,
     endpoint: input.endpoint,

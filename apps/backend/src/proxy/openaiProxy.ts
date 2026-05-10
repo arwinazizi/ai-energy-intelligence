@@ -106,14 +106,14 @@ export async function openAiProxy(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  let isAuthorized = false;
+  let authContext;
   try {
-    isAuthorized = await validateApiKey(clientApiKey);
+    authContext = await validateApiKey(clientApiKey);
   } catch (error) {
     console.warn("API key validation failed", error);
   }
 
-  if (!isAuthorized) {
+  if (!authContext) {
     sendAuthenticationError(res);
     return;
   }
@@ -209,6 +209,7 @@ export async function openAiProxy(req: Request, res: Response): Promise<void> {
         }
 
         const usageLog = {
+          organizationId: authContext.organizationId,
           provider: "openai" as const,
           ...usagePayload,
           ...calculateCostEnergyCo2(usagePayload)

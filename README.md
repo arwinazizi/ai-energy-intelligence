@@ -4,7 +4,7 @@ AI Energy Intelligence is a proxy-based measurement layer for AI usage. The V1 p
 
 ## Current Status
 
-This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md). It includes:
+This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md), with V2 pilot-readiness work started in issue #15. It includes:
 
 - a monorepo-shaped folder structure for backend, dashboard, and shared code
 - architecture and execution docs for the V1 prototype
@@ -23,6 +23,8 @@ This repository contains the completed V1 working prototype based on [IMPLEMENTA
 - Supabase migrations with `cost_usd` stored as `numeric(18, 12)`
 - Windows-safe `npm.cmd` workspace scripts
 - restored local GitHub CLI authentication for CLI-only GitHub workflows
+- V2 organization ownership for API keys and usage logs on the active development branch
+- tenant-scoped summary and recent APIs that require `x-api-key`
 - environment and repository hygiene files
 
 ## V1 Success Criteria
@@ -56,10 +58,11 @@ supabase/
 5. Build summary APIs and wire the dashboard to real data.
 6. Keep streaming/SSE responses as pass-through only until streaming usage extraction is scoped.
 
-## Remaining Closeout
+## Active V2 Scope
 
-- Keep GitHub tracker issue #2 aligned with the local project status.
-- Select the first V2 pilot-ready MVP issue before starting new implementation work.
+- Issue #15 adds organizations and tenant-scoped API keys only.
+- Dashboard login, CSV export, multi-provider support, and streaming usage logging remain out of scope.
+- The local dashboard can send `VITE_AEI_CLIENT_API_KEY` for protected summary API reads during pilot/dev use.
 
 ## Key Docs
 

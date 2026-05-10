@@ -71,10 +71,11 @@ async function readResponseText(response: Response): Promise<string> {
   }
 }
 
-async function readJson<T>(apiBaseUrl: string, path: string): Promise<T> {
+async function readJson<T>(apiBaseUrl: string, path: string, clientApiKey: string): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, {
     headers: {
-      accept: "application/json"
+      accept: "application/json",
+      "x-api-key": clientApiKey
     }
   });
 
@@ -96,6 +97,7 @@ function sleep(ms: number): Promise<void> {
 
 async function waitForSummaryIncrease(
   apiBaseUrl: string,
+  clientApiKey: string,
   minimumRequestCount: number,
   timeoutMs: number
 ): Promise<UsageSummaryDto> {
@@ -103,7 +105,7 @@ async function waitForSummaryIncrease(
   let lastSummary: UsageSummaryDto | null = null;
 
   while (Date.now() < expiresAt) {
-    lastSummary = await readJson<UsageSummaryDto>(apiBaseUrl, "/api/summary");
+    lastSummary = await readJson<UsageSummaryDto>(apiBaseUrl, "/api/summary", clientApiKey);
 
     if (lastSummary.request_count >= minimumRequestCount) {
       return lastSummary;
@@ -138,7 +140,7 @@ const model = readOptionalEnv("AEI_DEMO_MODEL") || DEFAULT_MODEL;
 const prompt = readOptionalEnv("AEI_DEMO_PROMPT") || DEFAULT_PROMPT;
 const timeoutMs = getTimeoutMs();
 
-const beforeSummary = await readJson<UsageSummaryDto>(apiBaseUrl, "/api/summary");
+const beforeSummary = await readJson<UsageSummaryDto>(apiBaseUrl, "/api/summary", clientApiKey);
 const response = await fetch(`${apiBaseUrl}/openai${DEMO_ENDPOINT}`, {
   method: "POST",
   headers: {
@@ -171,8 +173,8 @@ assert(isObject(parsedResponse.usage), "OpenAI proxy response did not include a 
 
 const responseModel = typeof parsedResponse.model === "string" ? parsedResponse.model : model;
 const totalTokens = getNumberField(parsedResponse.usage, "total_tokens");
-const afterSummary = await waitForSummaryIncrease(apiBaseUrl, beforeSummary.request_count + 1, timeoutMs);
-const recent = await readJson<RecentUsageLogsResponseDto>(apiBaseUrl, "/api/recent");
+const afterSummary = await waitForSummaryIncrease(apiBaseUrl, clientApiKey, beforeSummary.request_count + 1, timeoutMs);
+const recent = await readJson<RecentUsageLogsResponseDto>(apiBaseUrl, "/api/recent", clientApiKey);
 const newestRow = recent.items[0];
 
 assert(newestRow, "/api/recent returned no rows after /api/summary increased");

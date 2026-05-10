@@ -24,6 +24,7 @@ const clientRequestBody = JSON.stringify({
 });
 const validClientApiKey = "client-key-auth-smoke";
 const invalidClientApiKey = "client-key-invalid";
+const organizationId = "00000000-0000-4000-8000-000000000001";
 const validClientApiKeyHash = createHash("sha256").update(validClientApiKey).digest("hex");
 const invalidClientApiKeyHash = createHash("sha256").update(invalidClientApiKey).digest("hex");
 
@@ -165,7 +166,7 @@ function createFakeSupabase(
 
         res.statusCode = 200;
         res.setHeader("content-type", "application/json");
-        res.end(isValidKey ? '[{"id":"api-key-id"}]' : "[]");
+        res.end(isValidKey ? `[{"id":"api-key-id","organization_id":"${organizationId}"}]` : "[]");
         return;
       }
 
@@ -301,6 +302,7 @@ try {
   );
 
   const insertedUsage = JSON.parse(usageInsert.body) as Record<string, unknown>;
+  assert(insertedUsage.organization_id === organizationId, "Authorized usage insert organization_id was not set");
   assert(insertedUsage.provider === "openai", "Authorized usage insert provider was not set");
   assert(insertedUsage.endpoint === "/v1/chat/completions", "Authorized usage insert endpoint was not set");
   assert(insertedUsage.status_code === 202, "Authorized usage insert status_code was not set");

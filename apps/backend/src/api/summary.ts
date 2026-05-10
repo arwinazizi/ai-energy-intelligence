@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { Router } from "express";
 import type { RecentUsageLogDto, RecentUsageLogsResponseDto, UsageSummaryDto } from "@aei/shared";
+import { validateApiKey } from "../auth/validateApiKey.js";
 import { selectSupabaseRows } from "../db/supabase.js";
 
 const SUMMARY_SELECT = "input_tokens,output_tokens,total_tokens,cost_usd,energy_kwh,co2_grams";
@@ -118,20 +119,62 @@ function sendReadError(res: Response, error: unknown): void {
   });
 }
 
-export async function readUsageSummary(): Promise<UsageSummaryDto> {
+function getClientApiKey(req: Request): string | undefined {
+  const value = req.get("x-api-key")?.trim();
+  return value || undefined;
+}
+
+function sendAuthenticationError(res: Response): void {
+  res.status(401).json({
+    error: {
+      message: "Missing or invalid API key",
+      type: "authentication_error"
+    }
+  });
+}
+
+async function resolveOrganizationId(req: Request, res: Response): Promise<string | null> {
+  const clientApiKey = getClientApiKey(req);
+
+  if (!clientApiKey) {
+    sendAuthenticationError(res);
+    return null;
+  }
+
+  try {
+    const authContext = await validateApiKey(clientApiKey);
+    if (!authContext) {
+      sendAuthenticationError(res);
+      return null;
+    }
+
+    return authContext.organizationId;
+  } catch (error) {
+    console.warn("Summary API key validation failed", error);
+    sendAuthenticationError(res);
+    return null;
+  }
+}
+
+export async function readUsageSummary(organizationId: string): Promise<UsageSummaryDto> {
   const rows = await selectSupabaseRows("usage_logs", {
     query: {
-      select: SUMMARY_SELECT
+      select: SUMMARY_SELECT,
+      organization_id: `eq.${organizationId}`
     }
   });
 
   return summarizeRows(rows);
 }
 
-export async function readRecentUsageLogs(limit = RECENT_LIMIT): Promise<RecentUsageLogsResponseDto> {
+export async function readRecentUsageLogs(
+  organizationId: string,
+  limit = RECENT_LIMIT
+): Promise<RecentUsageLogsResponseDto> {
   const rows = await selectSupabaseRows("usage_logs", {
     query: {
       select: RECENT_SELECT,
+      organization_id: `eq.${organizationId}`,
       order: "created_at.desc",
       limit: String(limit)
     }
@@ -144,17 +187,27 @@ export async function readRecentUsageLogs(limit = RECENT_LIMIT): Promise<RecentU
 
 export const summaryApi = Router();
 
-summaryApi.get("/summary", async (_req: Request, res: Response) => {
+summaryApi.get("/summary", async (req: Request, res: Response) => {
+  const organizationId = await resolveOrganizationId(req, res);
+  if (!organizationId) {
+    return;
+  }
+
   try {
-    res.json(await readUsageSummary());
+    res.json(await readUsageSummary(organizationId));
   } catch (error) {
     sendReadError(res, error);
   }
 });
 
-summaryApi.get("/recent", async (_req: Request, res: Response) => {
+summaryApi.get("/recent", async (req: Request, res: Response) => {
+  const organizationId = await resolveOrganizationId(req, res);
+  if (!organizationId) {
+    return;
+  }
+
   try {
-    res.json(await readRecentUsageLogs());
+    res.json(await readRecentUsageLogs(organizationId));
   } catch (error) {
     sendReadError(res, error);
   }

@@ -31,12 +31,19 @@ function getApiBaseUrl(): string {
 }
 
 const API_BASE_URL = getApiBaseUrl();
+const CLIENT_API_KEY = import.meta.env.VITE_AEI_CLIENT_API_KEY?.trim();
 
 async function fetchJson<T>(path: string, signal: AbortSignal): Promise<T> {
+  const headers: Record<string, string> = {
+    Accept: "application/json"
+  };
+
+  if (CLIENT_API_KEY) {
+    headers["x-api-key"] = CLIENT_API_KEY;
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      Accept: "application/json"
-    },
+    headers,
     signal
   });
 

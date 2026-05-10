@@ -20,16 +20,20 @@ AEI_API_BASE_URL=http://127.0.0.1:4000
 AEI_DEMO_MODEL=gpt-4.1-mini
 ```
 
-`AEI_CLIENT_API_KEY` is the raw client key sent to the proxy as `x-api-key`. The backend authorizes it by checking the SHA-256 hash in `public.api_keys.key_hash`.
+`AEI_CLIENT_API_KEY` is the raw client key sent to the proxy and summary APIs as `x-api-key`. The backend authorizes it by checking the SHA-256 hash in `public.api_keys.key_hash` and resolving the owning organization.
 
 One-time Supabase setup:
 
 1. Apply `supabase/migrations/0001_v1_init.sql`.
-2. Insert the hash of your local client key in Supabase SQL editor:
+2. Apply `supabase/migrations/0002_usage_log_cost_precision.sql`.
+3. Apply `supabase/migrations/0003_organizations_tenant_scope.sql`.
+4. Insert the hash of your local client key for the default organization in Supabase SQL editor:
 
 ```sql
-insert into public.api_keys (key_hash)
-values (encode(digest('local-demo-key-change-me', 'sha256'), 'hex'))
+insert into public.api_keys (key_hash, organization_id)
+select encode(digest('local-demo-key-change-me', 'sha256'), 'hex'), id
+from public.organizations
+where slug = 'default'
 on conflict (key_hash) do nothing;
 ```
 
@@ -62,7 +66,7 @@ Run the live AEI-009 demo smoke in a second terminal:
 npm.cmd --workspace @aei/backend run smoke:demo
 ```
 
-The demo smoke assumes the backend is already listening at `AEI_API_BASE_URL`, sends one non-streaming `POST /openai/v1/chat/completions` request with `x-api-key`, waits for `/api/summary` to show one additional request, then verifies the newest `/api/recent` row matches the OpenAI response usage.
+The demo smoke assumes the backend is already listening at `AEI_API_BASE_URL`, sends one non-streaming `POST /openai/v1/chat/completions` request with `x-api-key`, waits for tenant-scoped `/api/summary` to show one additional request, then verifies the newest tenant-scoped `/api/recent` row matches the OpenAI response usage.
 
 Start the dashboard:
 
@@ -70,7 +74,7 @@ Start the dashboard:
 npm.cmd run dev:dashboard
 ```
 
-Open the Vite URL printed by the dashboard command. The dashboard defaults to `http://127.0.0.1:4000` for API reads; set `VITE_API_BASE_URL` if the backend uses another port.
+Open the Vite URL printed by the dashboard command. The dashboard defaults to `http://127.0.0.1:4000` for API reads; set `VITE_API_BASE_URL` if the backend uses another port and `VITE_AEI_CLIENT_API_KEY` to send the protected summary API key.
 
 ## Expected Result
 

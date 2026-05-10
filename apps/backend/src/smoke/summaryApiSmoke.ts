@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import http from "node:http";
 import type { IncomingHttpHeaders } from "node:http";
 import express from "express";
@@ -11,7 +12,15 @@ type SeenSupabaseRequest = {
   headers: IncomingHttpHeaders;
 };
 
+const organizationId = "00000000-0000-4000-8000-000000000001";
+const otherOrganizationId = "00000000-0000-4000-8000-000000000002";
+const validClientApiKey = "summary-smoke-client-key";
+const invalidClientApiKey = "summary-smoke-invalid-key";
+const validClientApiKeyHash = createHash("sha256").update(validClientApiKey).digest("hex");
+const invalidClientApiKeyHash = createHash("sha256").update(invalidClientApiKey).digest("hex");
+
 const olderUsageRow: UsageLogRow = {
+  organization_id: organizationId,
   provider: "openai",
   model: "gpt-4.1-mini",
   endpoint: "/v1/chat/completions",
@@ -26,6 +35,7 @@ const olderUsageRow: UsageLogRow = {
   created_at: "2026-04-28T10:00:00.000Z"
 };
 const newerUsageRow: UsageLogRow = {
+  organization_id: organizationId,
   provider: "openai",
   model: null,
   endpoint: "/v1/responses",
@@ -38,6 +48,21 @@ const newerUsageRow: UsageLogRow = {
   latency_ms: null,
   status_code: 200,
   created_at: "2026-04-28T11:00:00.000Z"
+};
+const otherTenantUsageRow: UsageLogRow = {
+  organization_id: otherOrganizationId,
+  provider: "openai",
+  model: "gpt-4.1-mini",
+  endpoint: "/v1/chat/completions",
+  input_tokens: 999,
+  output_tokens: 999,
+  total_tokens: 1998,
+  cost_usd: 99,
+  energy_kwh: 99,
+  co2_grams: 99,
+  latency_ms: 999,
+  status_code: 200,
+  created_at: "2026-04-28T12:00:00.000Z"
 };
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -53,6 +78,13 @@ function assertNear(actual: unknown, expected: number, message: string): void {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function assertAuthenticationFailure(response: { status: number; body: unknown }, name: string): Promise<void> {
+  assert(response.status === 401, `${name}: expected 401, received ${response.status}`);
+  assert(isObject(response.body), `${name}: expected JSON object response`);
+  assert(isObject(response.body.error), `${name}: expected JSON error object`);
+  assert(response.body.error.type === "authentication_error", `${name}: expected authentication_error type`);
 }
 
 function listen(server: http.Server): Promise<number> {
@@ -86,7 +118,7 @@ function close(server: http.Server): Promise<void> {
 
 function createFakeSupabase(seenRequests: SeenSupabaseRequest[], getRows: () => UsageLogRow[]): http.Server {
   return http.createServer((req, res) => {
-    if (req.method !== "GET" || !req.url?.startsWith("/rest/v1/usage_logs")) {
+    if (req.method !== "GET" || (!req.url?.startsWith("/rest/v1/api_keys") && !req.url?.startsWith("/rest/v1/usage_logs"))) {
       res.statusCode = 404;
       res.setHeader("content-type", "application/json");
       res.end('{"message":"unexpected fake Supabase request"}');
@@ -100,9 +132,19 @@ function createFakeSupabase(seenRequests: SeenSupabaseRequest[], getRows: () => 
     });
 
     const requestUrl = new URL(req.url, "http://127.0.0.1");
+    if (req.url.startsWith("/rest/v1/api_keys")) {
+      const isValidKey = requestUrl.searchParams.get("key_hash") === `eq.${validClientApiKeyHash}`;
+
+      res.statusCode = 200;
+      res.setHeader("content-type", "application/json");
+      res.end(isValidKey ? `[{"id":"api-key-id","organization_id":"${organizationId}"}]` : "[]");
+      return;
+    }
+
     const order = requestUrl.searchParams.get("order");
     const limit = requestUrl.searchParams.get("limit");
-    let responseRows = [...getRows()];
+    const organizationFilter = requestUrl.searchParams.get("organization_id");
+    let responseRows = getRows().filter((row) => `eq.${String(row.organization_id)}` === organizationFilter);
 
     if (order === "created_at.desc") {
       responseRows = responseRows.sort((left, right) =>
@@ -128,8 +170,9 @@ function createApiServer(): http.Server {
   return http.createServer(app);
 }
 
-async function readJson(url: string): Promise<{ status: number; body: unknown }> {
-  const response = await fetch(url);
+async function readJson(url: string, apiKey?: string): Promise<{ status: number; body: unknown }> {
+  const headers = apiKey ? { "x-api-key": apiKey } : undefined;
+  const response = await fetch(url, { headers });
 
   return {
     status: response.status,
@@ -152,7 +195,21 @@ try {
   const apiPort = await listen(apiServer);
   const apiBaseUrl = `http://127.0.0.1:${apiPort}/api`;
 
-  const emptySummary = await readJson(`${apiBaseUrl}/summary`);
+  const missingKeySummary = await readJson(`${apiBaseUrl}/summary`);
+  await assertAuthenticationFailure(missingKeySummary, "missing summary x-api-key");
+  assert(
+    !seenSupabaseRequests.some((request) => request.url?.startsWith("/rest/v1/usage_logs")),
+    "Missing x-api-key should not query usage_logs"
+  );
+
+  const invalidKeyRecent = await readJson(`${apiBaseUrl}/recent`, invalidClientApiKey);
+  await assertAuthenticationFailure(invalidKeyRecent, "invalid recent x-api-key");
+  assert(
+    seenSupabaseRequests.some((request) => request.url?.includes(`key_hash=eq.${invalidClientApiKeyHash}`)),
+    "Invalid x-api-key lookup did not use the hashed client key"
+  );
+
+  const emptySummary = await readJson(`${apiBaseUrl}/summary`, validClientApiKey);
   assert(emptySummary.status === 200, `Empty summary expected 200, received ${emptySummary.status}`);
   assert(isObject(emptySummary.body), "Empty summary response should be a JSON object");
   assert(emptySummary.body.request_count === 0, "Empty summary request_count should be zero");
@@ -163,15 +220,15 @@ try {
   assert(emptySummary.body.energy_kwh === 0, "Empty summary energy_kwh should be zero");
   assert(emptySummary.body.co2_grams === 0, "Empty summary co2_grams should be zero");
 
-  const emptyRecent = await readJson(`${apiBaseUrl}/recent`);
+  const emptyRecent = await readJson(`${apiBaseUrl}/recent`, validClientApiKey);
   assert(emptyRecent.status === 200, `Empty recent expected 200, received ${emptyRecent.status}`);
   assert(isObject(emptyRecent.body), "Empty recent response should be a JSON object");
   assert(Array.isArray(emptyRecent.body.items), "Empty recent items should be an array");
   assert(emptyRecent.body.items.length === 0, "Empty recent items should be empty");
 
-  usageRows = [olderUsageRow, newerUsageRow];
+  usageRows = [olderUsageRow, newerUsageRow, otherTenantUsageRow];
 
-  const populatedSummary = await readJson(`${apiBaseUrl}/summary`);
+  const populatedSummary = await readJson(`${apiBaseUrl}/summary`, validClientApiKey);
   assert(populatedSummary.status === 200, `Populated summary expected 200, received ${populatedSummary.status}`);
   assert(isObject(populatedSummary.body), "Populated summary response should be a JSON object");
   assert(populatedSummary.body.request_count === 2, "Populated summary request_count should include both rows");
@@ -182,7 +239,7 @@ try {
   assertNear(populatedSummary.body.energy_kwh, 0.0000078, "Populated summary energy_kwh total is wrong");
   assertNear(populatedSummary.body.co2_grams, 0.00312, "Populated summary co2_grams total is wrong");
 
-  const populatedRecent = await readJson(`${apiBaseUrl}/recent`);
+  const populatedRecent = await readJson(`${apiBaseUrl}/recent`, validClientApiKey);
   assert(populatedRecent.status === 200, `Populated recent expected 200, received ${populatedRecent.status}`);
   assert(isObject(populatedRecent.body), "Populated recent response should be a JSON object");
   assert(Array.isArray(populatedRecent.body.items), "Populated recent items should be an array");
@@ -206,6 +263,15 @@ try {
   const recentRequest = seenSupabaseRequests.find((request) => request.url?.includes("order=created_at.desc"));
   assert(recentRequest, "Recent API should request created_at descending order from Supabase");
   assert(recentRequest.url?.includes("limit=10"), "Recent API should request the V1 limit from Supabase");
+  assert(
+    recentRequest.url?.includes(`organization_id=eq.${organizationId}`),
+    "Recent API should filter rows by organization_id"
+  );
+
+  const summaryRequest = seenSupabaseRequests.find(
+    (request) => request.url?.startsWith("/rest/v1/usage_logs") && !request.url.includes("order=created_at.desc")
+  );
+  assert(summaryRequest?.url?.includes(`organization_id=eq.${organizationId}`), "Summary API should filter rows by organization_id");
 
   for (const request of seenSupabaseRequests) {
     assert(request.headers.apikey === "service-role-key", "Supabase apikey header was not sent");

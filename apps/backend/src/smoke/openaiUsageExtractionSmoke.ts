@@ -31,6 +31,7 @@ const streamingClientRequestBody = JSON.stringify({
 const sseFirstChunk = 'data: {"delta":"first"}\n\n';
 const sseSecondChunk = 'data: {"delta":"second"}\n\n';
 const validClientApiKey = "client-key-smoke";
+const organizationId = "00000000-0000-4000-8000-000000000001";
 const validClientApiKeyHash = createHash("sha256").update(validClientApiKey).digest("hex");
 
 type SeenRequest = {
@@ -156,7 +157,11 @@ function createFakeSupabase(
 
       res.statusCode = 200;
       res.setHeader("content-type", "application/json");
-      res.end(requestUrl.searchParams.get("key_hash") === `eq.${validKeyHash}` ? '[{"id":"api-key-id"}]' : "[]");
+      res.end(
+        requestUrl.searchParams.get("key_hash") === `eq.${validKeyHash}`
+          ? `[{"id":"api-key-id","organization_id":"${organizationId}"}]`
+          : "[]"
+      );
       return;
     }
 
@@ -285,6 +290,7 @@ try {
   assert(usageInsert.headers.prefer === "return=minimal", "Supabase prefer header was not sent");
 
   const insertedUsage = JSON.parse(usageInsert.body) as Record<string, unknown>;
+  assert(insertedUsage.organization_id === organizationId, "Supabase payload organization_id was not set");
   assert(insertedUsage.provider === "openai", "Supabase payload provider was not set");
   assert(insertedUsage.endpoint === "/v1/chat/completions", "Supabase payload endpoint was not set");
   assert(insertedUsage.status_code === 207, "Supabase payload status_code was not set");

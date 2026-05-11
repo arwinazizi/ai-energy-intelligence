@@ -20,7 +20,7 @@ const dashboardCorsOrigin = process.env.DASHBOARD_CORS_ORIGIN?.trim() || "*";
 function allowDashboardApiCors(req: Request, res: Response, next: NextFunction): void {
   res.setHeader("Access-Control-Allow-Origin", dashboardCorsOrigin);
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,x-api-key");
 
   if (req.method === "OPTIONS") {
     res.sendStatus(204);

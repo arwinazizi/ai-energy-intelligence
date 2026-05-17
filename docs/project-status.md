@@ -53,11 +53,11 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 
 ## In Progress
 
-- No implementation task is currently active.
+- AEI-015 / #19: V2 CSV export, implemented on `codex/aei-015-csv-export` pending review.
 
 ## Next
 
-- Then implement AEI-015 CSV export (#19).
+- Review and finish AEI-015 CSV export (#19).
 
 ## Later
 - Multi-provider support.
@@ -82,3 +82,4 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Streaming/SSE OpenAI responses are pass-through only and are not logged in V1
 - `usage_logs.cost_usd` preserves the calculator's 12-decimal output in Supabase
 - Dashboard login uses a minimal configured pilot credential and an HttpOnly signed session cookie; local/pilot dashboard API reads still send `VITE_AEI_CLIENT_API_KEY`
+- AEI-015 CSV export reuses the same `x-api-key` tenant scoping as summary/recent reads and does not change those JSON APIs

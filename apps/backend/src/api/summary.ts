@@ -20,6 +20,21 @@ const RECENT_SELECT = [
   "created_at"
 ].join(",");
 const RECENT_LIMIT = 10;
+const CSV_EXPORT_LIMIT = 1000;
+const CSV_EXPORT_COLUMNS: Array<{ header: string; field: keyof RecentUsageLogDto }> = [
+  { header: "created_at", field: "created_at" },
+  { header: "provider", field: "provider" },
+  { header: "model", field: "model" },
+  { header: "endpoint", field: "endpoint" },
+  { header: "input_tokens", field: "input_tokens" },
+  { header: "output_tokens", field: "output_tokens" },
+  { header: "total_tokens", field: "total_tokens" },
+  { header: "cost_usd", field: "cost_usd" },
+  { header: "energy_kwh", field: "energy_kwh" },
+  { header: "co2_grams", field: "co2_grams" },
+  { header: "latency_ms", field: "latency_ms" },
+  { header: "status_code", field: "status_code" }
+];
 
 function toNumber(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -109,6 +124,24 @@ function toRecentUsageLog(row: Record<string, unknown>): RecentUsageLogDto {
   };
 }
 
+function serializeCsvValue(value: RecentUsageLogDto[keyof RecentUsageLogDto]): string {
+  if (value === null) {
+    return "";
+  }
+
+  const text = String(value);
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+export function serializeUsageLogsCsv(rows: RecentUsageLogDto[]): string {
+  const header = CSV_EXPORT_COLUMNS.map((column) => column.header).join(",");
+  const body = rows.map((row) =>
+    CSV_EXPORT_COLUMNS.map((column) => serializeCsvValue(row[column.field])).join(",")
+  );
+
+  return [header, ...body].join("\r\n") + "\r\n";
+}
+
 function sendReadError(res: Response, error: unknown): void {
   console.warn("Summary API Supabase read failed", error);
   res.status(500).json({
@@ -185,6 +218,19 @@ export async function readRecentUsageLogs(
   };
 }
 
+export async function readUsageLogExport(organizationId: string, limit = CSV_EXPORT_LIMIT): Promise<RecentUsageLogDto[]> {
+  const rows = await selectSupabaseRows("usage_logs", {
+    query: {
+      select: RECENT_SELECT,
+      organization_id: `eq.${organizationId}`,
+      order: "created_at.desc",
+      limit: String(limit)
+    }
+  });
+
+  return rows.map(toRecentUsageLog);
+}
+
 export const summaryApi = Router();
 
 summaryApi.get("/summary", async (req: Request, res: Response) => {
@@ -208,6 +254,23 @@ summaryApi.get("/recent", async (req: Request, res: Response) => {
 
   try {
     res.json(await readRecentUsageLogs(organizationId));
+  } catch (error) {
+    sendReadError(res, error);
+  }
+});
+
+summaryApi.get("/usage.csv", async (req: Request, res: Response) => {
+  const organizationId = await resolveOrganizationId(req, res);
+  if (!organizationId) {
+    return;
+  }
+
+  try {
+    const csv = serializeUsageLogsCsv(await readUsageLogExport(organizationId));
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="aei-usage-export.csv"');
+    res.setHeader("Cache-Control", "no-store");
+    res.send(csv);
   } catch (error) {
     sendReadError(res, error);
   }

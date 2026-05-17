@@ -46,9 +46,10 @@ The backend also exposes read-only dashboard data endpoints:
 ```text
 GET /api/summary
 GET /api/recent
+GET /api/usage.csv
 ```
 
-Both endpoints require `x-api-key`. `/api/summary` returns aggregate request, token, cost, energy, and CO2 totals for the key's organization. `/api/recent` returns the 10 newest `usage_logs` rows for the key's organization with provider, model, endpoint, token counts, estimates, latency, status code, and creation time. Empty tenant datasets return zero totals and an empty recent list.
+All three endpoints require `x-api-key`. `/api/summary` returns aggregate request, token, cost, energy, and CO2 totals for the key's organization. `/api/recent` returns the 10 newest `usage_logs` rows for the key's organization with provider, model, endpoint, token counts, estimates, latency, status code, and creation time. `/api/usage.csv` returns a bounded CSV export of the newest 1000 usage rows for the key's organization using the same fields. Empty tenant datasets return zero totals, an empty recent list, or a header-only CSV export.
 
 The Supabase schema stores `usage_logs.cost_usd` as `numeric(18, 12)` so the 12-decimal calculator output is preserved. Use `npm.cmd` for workspace scripts on Windows.
 
@@ -68,6 +69,12 @@ Run the fake-Supabase Summary API smoke test:
 
 ```bash
 npm.cmd --workspace @aei/backend run smoke:summary
+```
+
+Run the fake-Supabase CSV export smoke test:
+
+```bash
+npm.cmd --workspace @aei/backend run smoke:csv-export
 ```
 
 Run the focused dashboard login/session smoke test:

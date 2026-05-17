@@ -50,14 +50,15 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Created GitHub issue #18 / AEI-014 for V2 dashboard login
 - Created GitHub issue #19 / AEI-015 for the next V2 pilot-readiness task: CSV export
 - Completed V2 dashboard login (#18, #20)
+- Completed and merged AEI-015 tenant-scoped CSV export (#19, #21)
 
 ## In Progress
 
-- AEI-015 / #19: V2 CSV export, implemented on `codex/aei-015-csv-export` pending review.
+- No active task.
 
 ## Next
 
-- Review and finish AEI-015 CSV export (#19).
+- Choose the next pilot-readiness task. Recommended: add a minimal dashboard CSV download action that calls the completed `GET /api/usage.csv` export with the current tenant credential.
 
 ## Later
 - Multi-provider support.

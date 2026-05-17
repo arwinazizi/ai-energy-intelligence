@@ -47,12 +47,13 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Created GitHub issue #15 / AEI-013 for the first V2 pilot-readiness task: organizations and tenant-scoped API keys
 - Completed V2 organizations and tenant-scoped API keys (#15, #17)
 - Applied Supabase tenant migration `0003_organizations_tenant_scope.sql` to the linked `ai-energy-intelligence` project
-- Created GitHub issue #18 / AEI-014 for the next V2 pilot-readiness task: dashboard login
+- Created GitHub issue #18 / AEI-014 for V2 dashboard login
 - Created GitHub issue #19 / AEI-015 for the next V2 pilot-readiness task: CSV export
+- Completed V2 dashboard login (#18, #20)
 
 ## In Progress
 
-- AEI-014 / #18: V2 dashboard login, implemented on `codex/aei-014-dashboard-login` pending review/merge.
+- No implementation task is currently active.
 
 ## Next
 

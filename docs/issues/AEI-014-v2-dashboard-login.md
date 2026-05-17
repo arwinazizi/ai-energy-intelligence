@@ -1,8 +1,9 @@
 # AEI-014: V2 Dashboard Login
 
-Status: In Progress, implemented on `codex/aei-014-dashboard-login` pending review/merge
+Status: Done, completed and closed in GitHub issue #18
 GitHub Issue: #18
 Tracker: #2
+GitHub PR: #20, merged
 
 ## Scope
 
@@ -15,6 +16,7 @@ Protect the pilot dashboard behind a minimal login flow while preserving the ten
 - Added dashboard session check, login, and logout states before the existing dashboard view can render.
 - Kept dashboard summary and recent reads on the existing `GET /api/summary` and `GET /api/recent` paths with `x-api-key`.
 - Added focused smoke coverage for the dashboard login/session/logout behavior.
+- Merged PR #20.
 
 ## Out Of Scope
 

@@ -18,11 +18,11 @@ This is the local mirror of the GitHub issue tracker. GitHub issues are the sour
 | AEI-011 | Done | V0 Static Concept Demo | Build a static React page that explains the measurement-layer idea with fake data and architecture. | #13 |
 | AEI-012 | Done | Review Fixes: Streaming Proxy / Cost Precision / Windows Scripts | Address review findings for safe streaming pass-through, Supabase cost precision, and Windows npm scripts. | #14 |
 | AEI-013 | Done | V2: Organizations and Tenant-Scoped API Keys | Add organizations, resolve API keys to tenants, write tenant-scoped usage logs, and filter summary APIs by organization. | #15 |
-| AEI-014 | In Progress | V2: Dashboard Login | Protect the dashboard behind a minimal pilot login while preserving tenant-scoped backend APIs. | #18 |
+| AEI-014 | Done | V2: Dashboard Login | Protect the dashboard behind a minimal pilot login while preserving tenant-scoped backend APIs. | #18 |
 | AEI-015 | Todo | V2: CSV Export | Export tenant-scoped recent usage data as CSV while preserving existing summary and recent APIs. | #19 |
 
 ## Rules
 
 - Keep statuses limited to `Todo`, `In Progress`, `Blocked`, and `Done`.
-- At most one implementation task issue should be `In Progress` at a time; AEI-014 is active on `codex/aei-014-dashboard-login`.
+- At most one implementation task issue should be `In Progress` at a time; no implementation task is currently active.
 - Keep this file aligned with GitHub issue state.

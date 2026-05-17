@@ -118,7 +118,7 @@ Add:
 
 This document describes the full system. The V1 working prototype is complete, and the first V2 pilot-readiness slice, organizations and tenant-scoped API keys, is complete via issue #15 / PR #17.
 
-The current implementation task is AEI-014 / #18 dashboard login, mirrored in tracker #2 and implemented on `codex/aei-014-dashboard-login` pending review/merge. The next planned V2 task is AEI-015 CSV export (#19).
+No implementation task is currently active. The next planned V2 task is AEI-015 CSV export (#19).
 
 ## 5. High-level architecture
 
@@ -467,4 +467,4 @@ Narrative:
 
 ## 20. Next step
 
-The V1 prototype and the first V2 organizations / tenant-scoped API-key slice are complete. AEI-014 / #18 dashboard login is the active pilot-readiness task, mirrored in tracker #2; AEI-015 CSV export (#19) follows it.
+The V1 prototype, V2 organizations / tenant-scoped API-key slice, and AEI-014 / #18 dashboard login are complete. AEI-015 CSV export (#19) is the next pilot-readiness task.

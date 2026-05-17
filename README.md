@@ -62,7 +62,8 @@ supabase/
 
 - Issue #15 added organizations and tenant-scoped API keys, and was completed, closed, and merged via PR #17.
 - Issue #18 / AEI-014 added a minimal pilot dashboard login and was completed, closed, and merged via PR #20.
-- CSV export, multi-provider support, and streaming usage logging remain out of scope for #18.
+- Issue #19 / AEI-015 adds tenant-scoped CSV export and is active on `codex/aei-015-csv-export`.
+- Multi-provider support and streaming usage logging remain out of scope for #19.
 - The local dashboard can send `VITE_AEI_CLIENT_API_KEY` for protected summary API reads during pilot/dev use.
 
 ## Key Docs

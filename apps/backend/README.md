@@ -29,7 +29,17 @@ Requests to `/openai/v1/...` are forwarded to `https://api.openai.com/v1/...` by
 
 The proxy validates the client `x-api-key` before proxying by hashing it with SHA-256 and checking `public.api_keys.key_hash` through Supabase PostgREST. A valid key resolves to its `organization_id`. Missing or invalid keys receive a small JSON 401 response and do not reach the upstream. Authorized requests preserve the upstream status code, headers, and raw response body for the client.
 
-The proxy extracts usage payloads from non-streaming OpenAI JSON responses, calculates V1 demo estimates for `cost_usd`, `energy_kwh`, and `co2_grams` from `@aei/shared`, logs the payload to the console, and asynchronously persists it to Supabase `public.usage_logs` using `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Usage inserts include the resolved `organization_id`. Persistence failures are console warnings only and do not alter the upstream response. Streaming/SSE responses are forwarded as pass-through bytes only and are not logged in V1. Dashboard login, key management UI, and streaming usage extraction are still out of scope.
+The proxy extracts usage payloads from non-streaming OpenAI JSON responses, calculates V1 demo estimates for `cost_usd`, `energy_kwh`, and `co2_grams` from `@aei/shared`, logs the payload to the console, and asynchronously persists it to Supabase `public.usage_logs` using `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Usage inserts include the resolved `organization_id`. Persistence failures are console warnings only and do not alter the upstream response. Streaming/SSE responses are forwarded as pass-through bytes only and are not logged in V1. Key management UI and streaming usage extraction are still out of scope.
+
+The backend also exposes minimal pilot dashboard session endpoints:
+
+```text
+GET /api/dashboard/session
+POST /api/dashboard/login
+POST /api/dashboard/logout
+```
+
+Configure the pilot login with `DASHBOARD_PILOT_USERNAME` and either `DASHBOARD_PILOT_PASSWORD` or `DASHBOARD_PILOT_PASSWORD_SHA256`. Set `DASHBOARD_SESSION_SECRET` for signed HttpOnly cookies. Optional settings are `DASHBOARD_SESSION_SECONDS`, `DASHBOARD_COOKIE_SECURE=true` for HTTPS, and `DASHBOARD_CORS_ORIGIN` for the dashboard origin.
 
 The backend also exposes read-only dashboard data endpoints:
 
@@ -60,6 +70,12 @@ Run the fake-Supabase Summary API smoke test:
 npm.cmd --workspace @aei/backend run smoke:summary
 ```
 
+Run the focused dashboard login/session smoke test:
+
+```bash
+npm.cmd --workspace @aei/backend run smoke:dashboard-auth
+```
+
 Run the live AEI-009 demo smoke after starting the backend with real OpenAI and Supabase credentials:
 
 ```bash
@@ -80,6 +96,7 @@ npm.cmd run build:backend
 - `src/proxy/openaiProxy.ts`
 - `src/providers/openai.ts`
 - `src/auth/validateApiKey.ts`
+- `src/auth/dashboardSession.ts`
 - `src/logging/logUsage.ts`
 - `src/api/summary.ts`
 - `src/db/supabase.ts`

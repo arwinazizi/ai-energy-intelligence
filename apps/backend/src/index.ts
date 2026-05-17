@@ -4,6 +4,7 @@ import { loadEnvFile } from "node:process";
 import type { NextFunction, Request, Response } from "express";
 import express from "express";
 import { summaryApi } from "./api/summary.js";
+import { dashboardSessionApi } from "./auth/dashboardSession.js";
 import { openAiProxy } from "./proxy/openaiProxy.js";
 
 for (const envFile of [resolve(process.cwd(), ".env"), resolve(process.cwd(), "..", "..", ".env")]) {
@@ -15,12 +16,14 @@ for (const envFile of [resolve(process.cwd(), ".env"), resolve(process.cwd(), ".
 
 const app = express();
 const port = Number(process.env.PORT || 4000);
-const dashboardCorsOrigin = process.env.DASHBOARD_CORS_ORIGIN?.trim() || "*";
+const dashboardCorsOrigin = process.env.DASHBOARD_CORS_ORIGIN?.trim() || "http://127.0.0.1:5173";
 
 function allowDashboardApiCors(req: Request, res: Response, next: NextFunction): void {
   res.setHeader("Access-Control-Allow-Origin", dashboardCorsOrigin);
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,x-api-key");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Vary", "Origin");
 
   if (req.method === "OPTIONS") {
     res.sendStatus(204);
@@ -34,6 +37,7 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+app.use("/api/dashboard", allowDashboardApiCors, express.json({ limit: "8kb" }), dashboardSessionApi);
 app.use("/api", allowDashboardApiCors, summaryApi);
 
 app.use(

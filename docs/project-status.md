@@ -45,23 +45,27 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Completed the V1 prototype epic locally; the remaining work is tracker/release cleanup and V2 task selection
 - Restored local GitHub CLI authentication for `arwinazizi` using GitHub CLI plain-file credential storage after the Windows credential-store login flow failed to persist a readable token
 - Created GitHub issue #15 / AEI-013 for the first V2 pilot-readiness task: organizations and tenant-scoped API keys
+- Completed V2 organizations and tenant-scoped API keys (#15, #17)
+- Applied Supabase tenant migration `0003_organizations_tenant_scope.sql` to the linked `ai-energy-intelligence` project
+- Created GitHub issue #18 / AEI-014 for the next V2 pilot-readiness task: dashboard login
+- Created GitHub issue #19 / AEI-015 for the next V2 pilot-readiness task: CSV export
 
 ## In Progress
 
-- AEI-013 / #15: V2 organizations and tenant-scoped API keys, implemented on `codex/v2-organizations-tenant-api-keys` and pending PR review/merge.
+- AEI-014 / #18: V2 dashboard login, implemented on `codex/aei-014-dashboard-login` pending review/merge.
 
 ## Next
 
-- Review and merge the PR for AEI-013 / #15.
-- After AEI-013 lands, select the next V2 pilot-ready MVP task.
+- Then implement AEI-015 CSV export (#19).
 
 ## Later
-- No deferred local admin tasks are currently tracked.
+- Multi-provider support.
+- Streaming usage extraction/logging.
 
 ## Risks / Blockers
 
-- GitHub CLI credentials are stored in `C:\Users\Arwin\AppData\Roaming\GitHub CLI\hosts.yml` because the normal Windows credential-store login flow did not persist a readable token
-- No active GitHub CLI authentication blocker remains.
+- GitHub CLI browser login reports success but does not persist a valid token in `hosts.yml`; GitHub connector access is working.
+- Supabase CLI migration history did not recognize the existing `0001_...` migration filenames as pending remote migrations, so `0003` was applied directly with `supabase db query --linked --file`.
 
 ## Decisions
 
@@ -76,4 +80,4 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - V2 summary and recent APIs require `x-api-key` and filter reads by the resolved organization
 - Streaming/SSE OpenAI responses are pass-through only and are not logged in V1
 - `usage_logs.cost_usd` preserves the calculator's 12-decimal output in Supabase
-- Dashboard login remains out of scope for AEI-013; local/pilot dashboard API reads can send `VITE_AEI_CLIENT_API_KEY`
+- Dashboard login uses a minimal configured pilot credential and an HttpOnly signed session cookie; local/pilot dashboard API reads still send `VITE_AEI_CLIENT_API_KEY`

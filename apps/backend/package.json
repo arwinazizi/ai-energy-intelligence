@@ -9,6 +9,8 @@
     "build": "tsc -p tsconfig.json",
     "presmoke:auth": "npm.cmd --workspace @aei/shared run build",
     "smoke:auth": "tsx src/smoke/openaiAuthSmoke.ts",
+    "presmoke:dashboard-auth": "npm.cmd --workspace @aei/shared run build",
+    "smoke:dashboard-auth": "tsx src/smoke/dashboardAuthSmoke.ts",
     "presmoke:usage": "npm.cmd --workspace @aei/shared run build",
     "smoke:usage": "tsx src/smoke/openaiUsageExtractionSmoke.ts",
     "presmoke:summary": "npm.cmd --workspace @aei/shared run build",

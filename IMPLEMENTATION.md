@@ -56,7 +56,7 @@ Output:
 - visual pitch
 - internal alignment (Axeliq)
 
-### V1 - Working prototype (current target)
+### V1 - Working prototype (complete)
 
 Goal: Prove real measurement works.
 
@@ -82,9 +82,9 @@ Goal: Safe external testing.
 
 Add:
 
-- organizations table
-- hashed API keys (proper)
-- dashboard auth
+- organizations table (done in #15 / PR #17)
+- tenant-scoped hashed API keys (done in #15 / PR #17)
+- dashboard auth (minimal pilot login in AEI-014 / #18)
 - CSV export
 - improved logging reliability
 - clearer methodology docs
@@ -95,7 +95,7 @@ Goal: Multiple companies use it.
 
 Add:
 
-- multi-tenant system
+- multi-tenant system hardening beyond the #15 tenant-scoping slice
 - API key management UI
 - Anthropic + others
 - streaming usage extraction and logging
@@ -114,11 +114,11 @@ Add:
 - SDKs
 - enterprise security
 
-## 4. Current focus: V1
+## 4. Current focus: V2 pilot readiness
 
-This document describes the full system, but the current implementation target is:
+This document describes the full system. The V1 working prototype is complete, and the first V2 pilot-readiness slice, organizations and tenant-scoped API keys, is complete via issue #15 / PR #17.
 
-**V1 Working Prototype**
+The current implementation task is AEI-014 / #18 dashboard login, mirrored in tracker #2 and implemented on `codex/aei-014-dashboard-login` pending review/merge. The next planned V2 task is AEI-015 CSV export (#19).
 
 ## 5. High-level architecture
 
@@ -218,13 +218,25 @@ scripts/
 
 ## 9. Database design
 
-### V1 minimal schema
+### Current schema
+
+#### `organizations`
+
+```sql
+CREATE TABLE organizations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
 
 #### `api_keys`
 
 ```sql
 CREATE TABLE api_keys (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id UUID NOT NULL REFERENCES organizations(id),
   key_hash TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -235,6 +247,7 @@ CREATE TABLE api_keys (
 ```sql
 CREATE TABLE usage_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id UUID NOT NULL REFERENCES organizations(id),
 
   provider TEXT,
   model TEXT,
@@ -286,6 +299,7 @@ const provider = {
 - reads `x-api-key`
 - hashes it
 - validates against DB
+- resolves the owning organization
 - allows or rejects
 
 ### 10.4 Logger
@@ -316,16 +330,16 @@ energy = tokens * estimated_energy_per_token
 co2 = energy * carbon_intensity
 ```
 
-## 11. REST API (V1)
+## 11. REST API
 
-Minimal only:
+Current dashboard data endpoints:
 
 - `GET /api/summary`
 - `GET /api/recent`
 
-No multi-tenant logic yet.
+Both endpoints require `x-api-key` and filter results by the resolved organization.
 
-## 12. Dashboard (V1)
+## 12. Dashboard
 
 One page only.
 
@@ -336,14 +350,18 @@ Components:
 - total energy
 - total CO2
 - recent logs table
+- pilot login/logout gate
 
-## 13. Authentication model (V1)
+## 13. Authentication model
 
-- single API key
+- client API keys
 - stored hashed
+- scoped to an organization
 - sent via header
+- minimal pilot dashboard login
+- signed HttpOnly dashboard session cookie
 
-No user login yet.
+Full production user, role, invite, and membership management is not part of the current pilot scope.
 
 ## 14. Build phases
 
@@ -449,8 +467,4 @@ Narrative:
 
 ## 20. Next step
 
-The proxy pass-through, non-streaming usage extraction, impact calculation, Supabase logging, API-key validation, and streaming/SSE pass-through behavior are complete. Next backend step:
-
-**summary APIs -> recent logs -> dashboard data**
-
-Everything else builds on that.
+The V1 prototype and the first V2 organizations / tenant-scoped API-key slice are complete. AEI-014 / #18 dashboard login is the active pilot-readiness task, mirrored in tracker #2; AEI-015 CSV export (#19) follows it.

@@ -4,7 +4,7 @@ AI Energy Intelligence is a proxy-based measurement layer for AI usage. The V1 p
 
 ## Current Status
 
-This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md), with V2 pilot-readiness work started in issue #15. It includes:
+This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md), plus the completed V2 organizations and tenant-scoped API-key slice from issue #15 / PR #17. It includes:
 
 - a monorepo-shaped folder structure for backend, dashboard, and shared code
 - architecture and execution docs for the V1 prototype
@@ -23,7 +23,7 @@ This repository contains the completed V1 working prototype based on [IMPLEMENTA
 - Supabase migrations with `cost_usd` stored as `numeric(18, 12)`
 - Windows-safe `npm.cmd` workspace scripts
 - restored local GitHub CLI authentication for CLI-only GitHub workflows
-- V2 organization ownership for API keys and usage logs on the active development branch
+- V2 organization ownership for API keys and usage logs
 - tenant-scoped summary and recent APIs that require `x-api-key`
 - environment and repository hygiene files
 
@@ -58,10 +58,11 @@ supabase/
 5. Build summary APIs and wire the dashboard to real data.
 6. Keep streaming/SSE responses as pass-through only until streaming usage extraction is scoped.
 
-## Active V2 Scope
+## Current V2 Status
 
-- Issue #15 adds organizations and tenant-scoped API keys only.
-- Dashboard login, CSV export, multi-provider support, and streaming usage logging remain out of scope.
+- Issue #15 added organizations and tenant-scoped API keys, and was completed, closed, and merged via PR #17.
+- Issue #18 / AEI-014 adds a minimal pilot dashboard login and is active on `codex/aei-014-dashboard-login`.
+- CSV export, multi-provider support, and streaming usage logging remain out of scope for #18.
 - The local dashboard can send `VITE_AEI_CLIENT_API_KEY` for protected summary API reads during pilot/dev use.
 
 ## Key Docs

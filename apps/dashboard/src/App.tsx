@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import type { RecentUsageLogsResponseDto, UsageSummaryDto } from "@aei/shared";
 
 type DashboardData = {
@@ -11,6 +11,29 @@ type DashboardState = {
   error: string | null;
   loading: boolean;
 };
+
+type AuthState = {
+  authenticated: boolean;
+  checking: boolean;
+  error: string | null;
+  username: string | null;
+};
+
+type LoginState = {
+  username: string;
+  password: string;
+  submitting: boolean;
+};
+
+type DashboardSessionResponse =
+  | {
+      authenticated: false;
+    }
+  | {
+      authenticated: true;
+      username: string;
+      expires_at: string;
+    };
 
 type Metric = {
   label: string;
@@ -52,6 +75,52 @@ async function fetchJson<T>(path: string, signal: AbortSignal): Promise<T> {
   }
 
   return response.json() as Promise<T>;
+}
+
+async function fetchDashboardSession(signal?: AbortSignal): Promise<DashboardSessionResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/dashboard/session`, {
+    credentials: "include",
+    headers: {
+      Accept: "application/json"
+    },
+    signal
+  });
+
+  if (!response.ok) {
+    throw new Error(`Session check failed with ${response.status}`);
+  }
+
+  return response.json() as Promise<DashboardSessionResponse>;
+}
+
+async function submitDashboardLogin(username: string, password: string): Promise<DashboardSessionResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/dashboard/login`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ username, password })
+  });
+
+  if (!response.ok) {
+    throw new Error(response.status === 503 ? "Dashboard login is not configured." : "Invalid dashboard login.");
+  }
+
+  return response.json() as Promise<DashboardSessionResponse>;
+}
+
+async function submitDashboardLogout(): Promise<void> {
+  await fetch(`${API_BASE_URL}/api/dashboard/logout`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: "{}"
+  });
 }
 
 function formatInteger(value: number): string {
@@ -133,13 +202,66 @@ function buildMetrics(summary: UsageSummaryDto | null): Metric[] {
 }
 
 function App() {
+  const [auth, setAuth] = useState<AuthState>({
+    authenticated: false,
+    checking: true,
+    error: null,
+    username: null
+  });
+  const [login, setLogin] = useState<LoginState>({
+    username: "pilot",
+    password: "",
+    submitting: false
+  });
   const [state, setState] = useState<DashboardState>({
     data: null,
     error: null,
-    loading: true
+    loading: false
   });
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    async function checkDashboardSession() {
+      try {
+        const session = await fetchDashboardSession(controller.signal);
+        setAuth({
+          authenticated: session.authenticated,
+          checking: false,
+          error: null,
+          username: session.authenticated ? session.username : null
+        });
+      } catch (error) {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        setAuth({
+          authenticated: false,
+          checking: false,
+          error: error instanceof Error ? error.message : "Failed to check dashboard session",
+          username: null
+        });
+      }
+    }
+
+    void checkDashboardSession();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!auth.authenticated) {
+      setState({
+        data: null,
+        error: null,
+        loading: false
+      });
+      return;
+    }
+
     const controller = new AbortController();
 
     async function loadDashboardData() {
@@ -178,7 +300,63 @@ function App() {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [auth.authenticated]);
+
+  async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLogin((current) => ({
+      ...current,
+      submitting: true
+    }));
+    setAuth((current) => ({
+      ...current,
+      error: null
+    }));
+
+    try {
+      const session = await submitDashboardLogin(login.username, login.password);
+      setAuth({
+        authenticated: session.authenticated,
+        checking: false,
+        error: null,
+        username: session.authenticated ? session.username : null
+      });
+      setLogin((current) => ({
+        ...current,
+        password: "",
+        submitting: false
+      }));
+    } catch (error) {
+      setAuth({
+        authenticated: false,
+        checking: false,
+        error: error instanceof Error ? error.message : "Dashboard login failed",
+        username: null
+      });
+      setLogin((current) => ({
+        ...current,
+        submitting: false
+      }));
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await submitDashboardLogout();
+    } finally {
+      setAuth({
+        authenticated: false,
+        checking: false,
+        error: null,
+        username: null
+      });
+      setState({
+        data: null,
+        error: null,
+        loading: false
+      });
+    }
+  }
 
   const summary = state.data?.summary ?? null;
   const recentLogs = state.data?.recent.items ?? [];
@@ -195,8 +373,80 @@ function App() {
       }));
   const hasNoRows = !state.loading && !state.error && summary?.request_count === 0 && recentLogs.length === 0;
 
+  if (auth.checking) {
+    return (
+      <main className="auth-shell">
+        <section className="login-panel" aria-live="polite">
+          <p className="eyebrow">Pilot dashboard</p>
+          <h1>AI Energy Intelligence</h1>
+          <p className="login-copy">Checking dashboard session...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (!auth.authenticated) {
+    return (
+      <main className="auth-shell">
+        <section className="login-panel" aria-labelledby="login-title">
+          <p className="eyebrow">Pilot dashboard</p>
+          <h1 id="login-title">AI Energy Intelligence</h1>
+          <p className="login-copy">Sign in to view tenant-scoped usage, cost, energy, and CO2 data.</p>
+          <form className="login-form" onSubmit={handleLoginSubmit}>
+            <label>
+              Username
+              <input
+                autoComplete="username"
+                name="username"
+                onChange={(event) =>
+                  setLogin((current) => ({
+                    ...current,
+                    username: event.target.value
+                  }))
+                }
+                required
+                type="text"
+                value={login.username}
+              />
+            </label>
+            <label>
+              Password
+              <input
+                autoComplete="current-password"
+                name="password"
+                onChange={(event) =>
+                  setLogin((current) => ({
+                    ...current,
+                    password: event.target.value
+                  }))
+                }
+                required
+                type="password"
+                value={login.password}
+              />
+            </label>
+            {auth.error ? (
+              <div className="login-error" role="alert">
+                {auth.error}
+              </div>
+            ) : null}
+            <button disabled={login.submitting} type="submit">
+              {login.submitting ? "Signing in..." : "Sign in"}
+            </button>
+          </form>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="app-shell">
+      <div className="dashboard-topbar">
+        <span>Signed in as {auth.username}</span>
+        <button type="button" onClick={handleLogout}>
+          Log out
+        </button>
+      </div>
       <section className="hero-section" aria-labelledby="page-title">
         <div className="hero-copy">
           <p className="eyebrow">Proxy-based AI measurement</p>

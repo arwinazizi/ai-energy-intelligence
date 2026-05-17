@@ -84,8 +84,8 @@ Add:
 
 - organizations table (done in #15 / PR #17)
 - tenant-scoped hashed API keys (done in #15 / PR #17)
-- dashboard auth (minimal pilot login in AEI-014 / #18)
-- CSV export
+- dashboard auth (minimal pilot login in AEI-014 / #18, PR #20)
+- tenant-scoped CSV export (done in AEI-015 / #19, PR #21)
 - improved logging reliability
 - clearer methodology docs
 
@@ -116,9 +116,9 @@ Add:
 
 ## 4. Current focus: V2 pilot readiness
 
-This document describes the full system. The V1 working prototype is complete, and the first V2 pilot-readiness slice, organizations and tenant-scoped API keys, is complete via issue #15 / PR #17.
+This document describes the full system roadmap. The V1 working prototype is complete. The completed V2 pilot-readiness slices are organizations and tenant-scoped API keys (AEI-013 / #15 / PR #17), dashboard login (AEI-014 / #18 / PR #20), and tenant-scoped CSV export (AEI-015 / #19 / PR #21).
 
-The current implementation task is AEI-015 / #19 CSV export, mirrored in tracker #2 and implemented on `codex/aei-015-csv-export` pending review.
+No implementation task is active. The next decision is choosing the next bounded V2 pilot-readiness task; the likely candidate is adding a minimal dashboard CSV download action that calls the existing `GET /api/usage.csv` endpoint.
 
 ## 5. High-level architecture
 
@@ -336,8 +336,9 @@ Current dashboard data endpoints:
 
 - `GET /api/summary`
 - `GET /api/recent`
+- `GET /api/usage.csv`
 
-Both endpoints require `x-api-key` and filter results by the resolved organization.
+All three endpoints require `x-api-key` and filter results by the resolved organization.
 
 ## 12. Dashboard
 
@@ -351,6 +352,8 @@ Components:
 - total CO2
 - recent logs table
 - pilot login/logout gate
+
+The dashboard does not yet include a CSV download action. The backend CSV endpoint already exists, so adding a small dashboard action is the likely next pilot-readiness task.
 
 ## 13. Authentication model
 
@@ -465,6 +468,8 @@ Narrative:
 
 "I build systems that measure invisible behavior."
 
-## 20. Next step
+## 20. Current state and next step
 
-The V1 prototype, V2 organizations / tenant-scoped API-key slice, and AEI-014 / #18 dashboard login are complete. AEI-015 CSV export (#19) is the active pilot-readiness task.
+The V1 prototype, V2 organizations / tenant-scoped API-key slice, AEI-014 / #18 dashboard login, and AEI-015 / #19 CSV export are complete and merged. Docs sync PR #22 is also merged, and `main` is aligned with `origin/main`.
+
+No implementation task is active. The next step is to choose the next bounded V2 pilot-readiness task, with the dashboard CSV download action as the recommended candidate.

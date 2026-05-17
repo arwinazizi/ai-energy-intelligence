@@ -2,6 +2,8 @@
 
 This is the local mirror of the GitHub issue tracker. GitHub issues are the source of truth; update this file when issue status or numbering changes so agents can recover context from the repository alone.
 
+Current owner-facing state: all implementation tasks through AEI-015 are done and merged. AEI-000 is the ongoing tracker, not an active implementation task.
+
 | Local ID | Status | Title | Purpose | GitHub Issue |
 | --- | --- | --- | --- | --- |
 | AEI-000 | In Progress | Program Tracker | Single place to read done, doing, next, blockers, and decisions. | #2 |

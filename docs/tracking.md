@@ -12,7 +12,7 @@ This project should remain understandable even if all short-term memory is gone.
 ## Non-Negotiable Rules
 
 1. No material work starts without an issue.
-2. One issue is the active issue at any given time.
+2. At most one implementation issue is active at any given time; between completed tasks, no implementation issue may be active.
 3. Every completed task updates the tracker issue before moving on.
 4. Scope changes are written down in the issue or docs the same session they are discovered.
 5. Commits and pull requests must reference the issue they advance or close.
@@ -20,7 +20,7 @@ This project should remain understandable even if all short-term memory is gone.
 ## Minimal Workflow
 
 1. Open or update the tracker issue.
-2. Create or pick exactly one active task issue.
+2. Before material work starts, create or pick exactly one active task issue.
 3. Do the work on a branch that references the issue number.
 4. Commit with the issue number in the message.
 5. Close the issue only after verification is written down.

@@ -1,5 +1,7 @@
 # V1 Build Plan
 
+This is a historical execution plan for the completed V1 prototype. It documents the order used to reach the V1 demo and should not be read as the current task list. The current project state is tracked in `docs/project-status.md` and `docs/issue-register.md`.
+
 ## Definition Of Done
 
 - One non-streaming OpenAI JSON request can be sent through the proxy.
@@ -90,11 +92,8 @@ Goal: prove the full local V1 path can be repeated.
 - `apps/backend/src/auth/validateApiKey.ts`
 - `apps/backend/src/db/supabase.ts`
 - `packages/shared/src/usageImpact.ts`
-
-Next planned API file:
-
 - `apps/backend/src/api/summary.ts`
 
-## Stop Condition For The First Coding Session
+## Historical Stop Condition For The First Coding Session
 
 Stop as soon as one non-streaming OpenAI JSON response is forwarded unchanged and the extracted usage payload is printed correctly. That de-risks the core path before database or UI work starts.

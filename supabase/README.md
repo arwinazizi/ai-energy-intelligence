@@ -11,5 +11,5 @@ Start with:
 Current scope boundaries:
 
 - no dashboard auth tables yet
-- no export pipeline yet
+- no scheduled export/reporting pipeline yet; the pilot CSV export endpoint is implemented in the backend
 - no streaming usage logging yet

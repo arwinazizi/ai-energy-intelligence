@@ -1,13 +1,14 @@
 # Backend
 
-The backend owns the V1 critical path:
+The backend owns the measurement path and the current V2 pilot-readiness APIs:
 
 - validate the shared API key
 - proxy OpenAI requests
 - extract usage and latency
 - calculate cost, energy, and CO2
 - log asynchronously
-- expose summary endpoints for the dashboard
+- expose tenant-scoped summary, recent-log, and CSV endpoints
+- provide the minimal pilot dashboard session endpoints
 
 ## Current Proxy Pass-Through
 

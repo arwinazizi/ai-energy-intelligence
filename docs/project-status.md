@@ -51,6 +51,8 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Created GitHub issue #19 / AEI-015 for the next V2 pilot-readiness task: CSV export
 - Completed V2 dashboard login (#18, #20)
 - Completed and merged AEI-015 tenant-scoped CSV export (#19, #21)
+- Merged docs sync PR #22
+- Confirmed `main` is aligned with `origin/main`
 
 ## In Progress
 

@@ -1,8 +1,9 @@
 # AEI-015: V2 CSV Export
 
-Status: In Progress, implemented on `codex/aei-015-csv-export` pending review
+Status: Done, completed and closed in GitHub issue #19
 GitHub Issue: #19
 Tracker: #2
+GitHub PR: #21, merged
 
 ## Scope
 
@@ -15,6 +16,7 @@ Add a practical pilot CSV export for tenant-scoped usage data without changing t
 - Kept `GET /api/summary` and `GET /api/recent` JSON behavior unchanged.
 - Added structured CSV serialization with correct escaping for commas, quotes, and newlines.
 - Added focused smoke coverage for missing, invalid, and valid tenant credentials plus CSV headers, scoping, ordering, limit, and escaping.
+- Merged PR #21.
 
 ## Out Of Scope
 

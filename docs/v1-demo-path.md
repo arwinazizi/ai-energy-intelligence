@@ -1,5 +1,7 @@
 # V1 Demo Path
 
+This is a historical V1 demo path. It remains useful for proving the original request -> proxy -> Supabase -> dashboard data flow, but it is not the full current V2 pilot-readiness state.
+
 AEI-009 proves the local V1 path end to end:
 
 ```text
@@ -74,7 +76,7 @@ Start the dashboard:
 npm.cmd run dev:dashboard
 ```
 
-Open the Vite URL printed by the dashboard command. The dashboard defaults to `http://127.0.0.1:4000` for API reads; set `VITE_API_BASE_URL` if the backend uses another port and `VITE_AEI_CLIENT_API_KEY` to send the protected summary API key.
+Open the Vite URL printed by the dashboard command. The dashboard defaults to `http://127.0.0.1:4000` for API reads; set `VITE_API_BASE_URL` if the backend uses another port and `VITE_AEI_CLIENT_API_KEY` to send the protected summary API key. In the current V2 state, the dashboard also requires the configured pilot login before metrics render.
 
 ## Expected Result
 
@@ -91,6 +93,6 @@ The dashboard should then show the updated totals and the new row in the recent 
 ## Scope Notes
 
 - This is a live integration smoke and requires real OpenAI and Supabase credentials.
-- It does not add dashboard auth.
+- The original AEI-009 smoke predates dashboard login and does not verify the login flow.
 - It does not test or implement streaming usage logging.
-- Existing fake-upstream smokes remain the repeatable no-secret tests for proxy, auth, persistence wiring, and Summary API behavior.
+- Existing fake-upstream smokes remain the repeatable no-secret tests for proxy, auth, persistence wiring, Summary API behavior, dashboard auth, and CSV export.

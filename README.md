@@ -4,7 +4,11 @@ AI Energy Intelligence is a proxy-based measurement layer for AI usage. The V1 p
 
 ## Current Status
 
-This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md), plus the completed V2 organizations and tenant-scoped API-key slice from issue #15 / PR #17. It includes:
+This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md), plus the completed V2 pilot-readiness slices from AEI-013, AEI-014, and AEI-015. `main` is aligned with `origin/main`, docs sync PR #22 is merged, and no implementation task is active.
+
+The next project decision is choosing the next bounded V2 pilot-readiness task. The recommended candidate is a minimal dashboard CSV download action that uses the existing `GET /api/usage.csv` endpoint.
+
+It includes:
 
 - a monorepo-shaped folder structure for backend, dashboard, and shared code
 - architecture and execution docs for the V1 prototype
@@ -25,6 +29,8 @@ This repository contains the completed V1 working prototype based on [IMPLEMENTA
 - restored local GitHub CLI authentication for CLI-only GitHub workflows
 - V2 organization ownership for API keys and usage logs
 - tenant-scoped summary and recent APIs that require `x-api-key`
+- tenant-scoped CSV export through `GET /api/usage.csv`
+- minimal pilot dashboard login
 - environment and repository hygiene files
 
 ## V1 Success Criteria
@@ -62,9 +68,12 @@ supabase/
 
 - Issue #15 added organizations and tenant-scoped API keys, and was completed, closed, and merged via PR #17.
 - Issue #18 / AEI-014 added a minimal pilot dashboard login and was completed, closed, and merged via PR #20.
-- Issue #19 / AEI-015 adds tenant-scoped CSV export and is active on `codex/aei-015-csv-export`.
-- Multi-provider support and streaming usage logging remain out of scope for #19.
-- The local dashboard can send `VITE_AEI_CLIENT_API_KEY` for protected summary API reads during pilot/dev use.
+- Issue #19 / AEI-015 added tenant-scoped CSV export and was completed, closed, and merged via PR #21.
+- Docs sync PR #22 is merged.
+- No implementation task is active.
+- Next recommended decision: pick the next bounded V2 pilot-readiness task, likely a dashboard CSV download action that calls the completed `GET /api/usage.csv` endpoint.
+- Multi-provider support and streaming usage logging remain outside the completed V2 pilot-readiness slices.
+- The local dashboard can send `VITE_AEI_CLIENT_API_KEY` for protected tenant-scoped API reads during pilot/dev use.
 
 ## Key Docs
 

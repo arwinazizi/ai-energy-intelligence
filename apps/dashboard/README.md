@@ -6,8 +6,9 @@ The dashboard is intentionally narrow for pilot readiness. It answers:
 - what that cost
 - what the estimated energy and CO2 were
 - what the latest requests looked like
+- a CSV export of tenant-scoped recent usage
 
-It now sits behind the minimal pilot login added in AEI-014. It does not yet expose the completed AEI-015 CSV export endpoint in the UI.
+It now sits behind the minimal pilot login added in AEI-014 and exposes the completed AEI-015 CSV export endpoint through the AEI-016 download action.
 
 ## Pilot Login
 
@@ -19,15 +20,13 @@ Required local environment:
 - backend: `DASHBOARD_SESSION_SECRET`
 - backend: `DASHBOARD_CORS_ORIGIN` when the dashboard is not served from the backend origin
 - dashboard: `VITE_API_BASE_URL`
-- dashboard: `VITE_AEI_CLIENT_API_KEY` for the tenant-scoped summary and recent API reads
+- dashboard: `VITE_AEI_CLIENT_API_KEY` for the tenant-scoped summary, recent API reads, and CSV export
 
 ## Current Boundary
 
-The backend already exposes tenant-scoped CSV export at `GET /api/usage.csv`. The dashboard does not yet have a CSV download button or link; adding that action is the recommended next bounded V2 pilot-readiness task.
+The backend exposes tenant-scoped CSV export at `GET /api/usage.csv`. The dashboard downloads it with `fetch`, `x-api-key`, a Blob/object URL, and a temporary download link because a normal anchor link cannot attach the required API-key header.
 
 ## Suggested First Files
 
 - `src/App.tsx`
-- `src/components/SummaryCards.tsx`
-- `src/components/RecentLogsTable.tsx`
-- `src/components/MetricChart.tsx`
+- `src/styles.css`

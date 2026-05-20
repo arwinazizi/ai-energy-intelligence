@@ -53,6 +53,8 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Completed and merged AEI-015 tenant-scoped CSV export (#19, #21)
 - Merged docs sync PR #22
 - Confirmed `main` is aligned with `origin/main`
+- Created GitHub issue #24 / AEI-016 for V2 dashboard CSV download action
+- Completed AEI-016 dashboard CSV download action (#24)
 
 ## In Progress
 
@@ -60,7 +62,7 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 
 ## Next
 
-- Choose the next pilot-readiness task. Recommended: add a minimal dashboard CSV download action that calls the completed `GET /api/usage.csv` export with the current tenant credential.
+- Choose the next bounded V2 pilot-readiness task.
 
 ## Later
 - Multi-provider support.
@@ -86,3 +88,4 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - `usage_logs.cost_usd` preserves the calculator's 12-decimal output in Supabase
 - Dashboard login uses a minimal configured pilot credential and an HttpOnly signed session cookie; local/pilot dashboard API reads still send `VITE_AEI_CLIENT_API_KEY`
 - AEI-015 CSV export reuses the same `x-api-key` tenant scoping as summary/recent reads and does not change those JSON APIs
+- AEI-016 dashboard CSV download uses `fetch`, the configured client API key header, a Blob/object URL, and a temporary download link because a normal anchor cannot send `x-api-key`

@@ -25,6 +25,11 @@ type LoginState = {
   submitting: boolean;
 };
 
+type CsvExportState = {
+  error: string | null;
+  loading: boolean;
+};
+
 type DashboardSessionResponse =
   | {
       authenticated: false;
@@ -123,6 +128,49 @@ async function submitDashboardLogout(): Promise<void> {
   });
 }
 
+function getCsvExportFilename(contentDisposition: string | null): string {
+  if (!contentDisposition) {
+    return "aei-usage-export.csv";
+  }
+
+  const filenameMatch = /(?:^|;)\s*filename="([^"]+)"/i.exec(contentDisposition);
+  const filename = filenameMatch?.[1]?.trim();
+  return filename && !/[\\/:*?"<>|]/.test(filename) ? filename : "aei-usage-export.csv";
+}
+
+async function downloadUsageCsv(): Promise<void> {
+  const headers: Record<string, string> = {
+    Accept: "text/csv"
+  };
+
+  if (CLIENT_API_KEY) {
+    headers["x-api-key"] = CLIENT_API_KEY;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/usage.csv`, {
+    headers
+  });
+
+  if (!response.ok) {
+    throw new Error(`CSV export failed with ${response.status}`);
+  }
+
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  try {
+    link.href = objectUrl;
+    link.download = getCsvExportFilename(response.headers.get("Content-Disposition"));
+    link.style.display = "none";
+    document.body.append(link);
+    link.click();
+  } finally {
+    link.remove();
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 function formatInteger(value: number): string {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 0
@@ -218,6 +266,10 @@ function App() {
     error: null,
     loading: false
   });
+  const [csvExport, setCsvExport] = useState<CsvExportState>({
+    error: null,
+    loading: false
+  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -256,6 +308,10 @@ function App() {
     if (!auth.authenticated) {
       setState({
         data: null,
+        error: null,
+        loading: false
+      });
+      setCsvExport({
         error: null,
         loading: false
       });
@@ -355,6 +411,30 @@ function App() {
         error: null,
         loading: false
       });
+      setCsvExport({
+        error: null,
+        loading: false
+      });
+    }
+  }
+
+  async function handleCsvExport() {
+    setCsvExport({
+      error: null,
+      loading: true
+    });
+
+    try {
+      await downloadUsageCsv();
+      setCsvExport({
+        error: null,
+        loading: false
+      });
+    } catch (error) {
+      setCsvExport({
+        error: error instanceof Error ? error.message : "CSV export failed",
+        loading: false
+      });
     }
   }
 
@@ -443,6 +523,9 @@ function App() {
     <main className="app-shell">
       <div className="dashboard-topbar">
         <span>Signed in as {auth.username}</span>
+        <button disabled={csvExport.loading} type="button" onClick={handleCsvExport}>
+          {csvExport.loading ? "Exporting..." : "Download CSV"}
+        </button>
         <button type="button" onClick={handleLogout}>
           Log out
         </button>
@@ -497,6 +580,13 @@ function App() {
           <span>
             Check that the backend is running at {API_BASE_URL}. {state.error}
           </span>
+        </section>
+      ) : null}
+
+      {csvExport.error ? (
+        <section className="status-panel error-panel" aria-live="polite">
+          <strong>Unable to download CSV export.</strong>
+          <span>{csvExport.error}</span>
         </section>
       ) : null}
 

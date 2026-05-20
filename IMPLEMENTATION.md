@@ -86,6 +86,7 @@ Add:
 - tenant-scoped hashed API keys (done in #15 / PR #17)
 - dashboard auth (minimal pilot login in AEI-014 / #18, PR #20)
 - tenant-scoped CSV export (done in AEI-015 / #19, PR #21)
+- dashboard CSV download action (done in AEI-016 / #24)
 - improved logging reliability
 - clearer methodology docs
 
@@ -116,9 +117,9 @@ Add:
 
 ## 4. Current focus: V2 pilot readiness
 
-This document describes the full system roadmap. The V1 working prototype is complete. The completed V2 pilot-readiness slices are organizations and tenant-scoped API keys (AEI-013 / #15 / PR #17), dashboard login (AEI-014 / #18 / PR #20), and tenant-scoped CSV export (AEI-015 / #19 / PR #21).
+This document describes the full system roadmap. The V1 working prototype is complete. The completed V2 pilot-readiness slices are organizations and tenant-scoped API keys (AEI-013 / #15 / PR #17), dashboard login (AEI-014 / #18 / PR #20), tenant-scoped CSV export (AEI-015 / #19 / PR #21), and dashboard CSV download action (AEI-016 / #24).
 
-No implementation task is active. The next decision is choosing the next bounded V2 pilot-readiness task; the likely candidate is adding a minimal dashboard CSV download action that calls the existing `GET /api/usage.csv` endpoint.
+No implementation task is active. The next decision is choosing the next bounded V2 pilot-readiness task.
 
 ## 5. High-level architecture
 
@@ -352,8 +353,9 @@ Components:
 - total CO2
 - recent logs table
 - pilot login/logout gate
+- CSV download action
 
-The dashboard does not yet include a CSV download action. The backend CSV endpoint already exists, so adding a small dashboard action is the likely next pilot-readiness task.
+The dashboard includes a minimal CSV download action that calls the tenant-scoped backend CSV endpoint with the configured client API key.
 
 ## 13. Authentication model
 
@@ -470,6 +472,6 @@ Narrative:
 
 ## 20. Current state and next step
 
-The V1 prototype, V2 organizations / tenant-scoped API-key slice, AEI-014 / #18 dashboard login, and AEI-015 / #19 CSV export are complete and merged. Docs sync PR #22 is also merged, and `main` is aligned with `origin/main`.
+The V1 prototype, V2 organizations / tenant-scoped API-key slice, AEI-014 / #18 dashboard login, AEI-015 / #19 CSV export, and AEI-016 / #24 dashboard CSV download action are complete. Docs sync PR #22 is also merged, and `main` is aligned with `origin/main`.
 
-No implementation task is active. The next step is to choose the next bounded V2 pilot-readiness task, with the dashboard CSV download action as the recommended candidate.
+No implementation task is active. The next step is to choose the next bounded V2 pilot-readiness task.

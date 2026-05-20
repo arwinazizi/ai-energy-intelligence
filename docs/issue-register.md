@@ -2,7 +2,7 @@
 
 This is the local mirror of the GitHub issue tracker. GitHub issues are the source of truth; update this file when issue status or numbering changes so agents can recover context from the repository alone.
 
-Current owner-facing state: all implementation tasks through AEI-015 are done and merged. AEI-000 is the ongoing tracker, not an active implementation task.
+Current owner-facing state: all implementation tasks through AEI-016 are done. AEI-000 is the ongoing tracker, not an active implementation task.
 
 | Local ID | Status | Title | Purpose | GitHub Issue |
 | --- | --- | --- | --- | --- |
@@ -22,6 +22,7 @@ Current owner-facing state: all implementation tasks through AEI-015 are done an
 | AEI-013 | Done | V2: Organizations and Tenant-Scoped API Keys | Add organizations, resolve API keys to tenants, write tenant-scoped usage logs, and filter summary APIs by organization. | #15 |
 | AEI-014 | Done | V2: Dashboard Login | Protect the dashboard behind a minimal pilot login while preserving tenant-scoped backend APIs. | #18 |
 | AEI-015 | Done | V2: CSV Export | Export tenant-scoped recent usage data as CSV while preserving existing summary and recent APIs. | #19 |
+| AEI-016 | Done | V2: Dashboard CSV Download Action | Add an authenticated dashboard control that downloads the tenant-scoped CSV export. | #24 |
 
 ## Rules
 

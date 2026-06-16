@@ -55,14 +55,15 @@ This file mirrors GitHub tracker issue #2. GitHub issues are the source of truth
 - Confirmed `main` is aligned with `origin/main`
 - Created GitHub issue #24 / AEI-016 for V2 dashboard CSV download action
 - Completed AEI-016 dashboard CSV download action (#24)
+- Created GitHub issue #26 / AEI-017 for V2 logging reliability hardening
 
 ## In Progress
 
-- No active task.
+- AEI-017 / #26 logging reliability hardening is implemented locally with draft PR #27 open.
 
 ## Next
 
-- Choose the next bounded V2 pilot-readiness task.
+- Review and merge AEI-017 / PR #27, close #26, then select the next bounded V2 pilot-readiness task.
 
 ## Later
 - Multi-provider support.

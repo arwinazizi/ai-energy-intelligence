@@ -13,6 +13,8 @@
     "smoke:dashboard-auth": "tsx src/smoke/dashboardAuthSmoke.ts",
     "presmoke:csv-export": "npm.cmd --workspace @aei/shared run build",
     "smoke:csv-export": "tsx src/smoke/csvExportSmoke.ts",
+    "presmoke:logging-reliability": "npm.cmd --workspace @aei/shared run build",
+    "smoke:logging-reliability": "tsx src/smoke/openaiLoggingReliabilitySmoke.ts",
     "presmoke:usage": "npm.cmd --workspace @aei/shared run build",
     "smoke:usage": "tsx src/smoke/openaiUsageExtractionSmoke.ts",
     "presmoke:summary": "npm.cmd --workspace @aei/shared run build",

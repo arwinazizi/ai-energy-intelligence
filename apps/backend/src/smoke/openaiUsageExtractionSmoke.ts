@@ -321,17 +321,29 @@ try {
 
   assert(failureResponse.status === 207, `Expected upstream status after logging failure, received ${failureResponse.status}`);
   assert(failureResponseBody === upstreamResponseBody, "Logging failure changed the upstream response body");
-  await waitFor(() => seenSupabaseInserts.length === 2, "Expected failed usage insert attempt");
+  await waitFor(() => seenSupabaseInserts.length === 3, "Expected failed usage insert attempts");
   await waitFor(
-    () => consoleWarnings.some((args) => args[0] === "OpenAI usage persistence failed"),
+    () => consoleWarnings.some((args) => args[0] === "Usage log persistence failed"),
     "Expected logging failure to be console-warned"
   );
-  const persistenceWarning = consoleWarnings.find((args) => args[0] === "OpenAI usage persistence failed");
-  assert(persistenceWarning?.[1] instanceof Error, "Expected persistence warning to include an Error");
+  const persistenceWarnings = consoleWarnings.filter((args) => args[0] === "Usage log persistence failed");
+  assert(persistenceWarnings.length === 2, `Expected 2 persistence warnings, received ${persistenceWarnings.length}`);
+  const firstPersistenceWarning = persistenceWarnings[0]?.[1] as Record<string, unknown> | undefined;
+  const secondPersistenceWarning = persistenceWarnings[1]?.[1] as Record<string, unknown> | undefined;
+  assert(firstPersistenceWarning?.event === "usage_log_persistence_failed", "First persistence warning event was not structured");
+  assert(firstPersistenceWarning.provider === "openai", "First persistence warning provider was not set");
+  assert(firstPersistenceWarning.endpoint === "/v1/chat/completions", "First persistence warning endpoint was not set");
+  assert(firstPersistenceWarning.organization_id === organizationId, "First persistence warning organization_id was not set");
+  assert(firstPersistenceWarning.status_code === 207, "First persistence warning status_code was not set");
+  assert(firstPersistenceWarning.attempt === 1, "First persistence warning attempt was not set");
+  assert(firstPersistenceWarning.max_attempts === 2, "First persistence warning max_attempts was not set");
+  assert(firstPersistenceWarning.will_retry === true, "First persistence warning should indicate retry");
   assert(
-    (persistenceWarning[1] as Error).message.includes("500"),
-    "Expected persistence warning to include Supabase response status"
+    typeof firstPersistenceWarning.error_message === "string" && firstPersistenceWarning.error_message.includes("500"),
+    "First persistence warning should include Supabase response status"
   );
+  assert(secondPersistenceWarning?.attempt === 2, "Second persistence warning attempt was not set");
+  assert(secondPersistenceWarning.will_retry === false, "Second persistence warning should not indicate retry");
 
   const usageLogCountBeforeStream = consoleLogs.filter((args) => args[0] === "OpenAI usage extracted").length;
   const usageInsertCountBeforeStream = seenSupabaseInserts.length;

@@ -87,7 +87,7 @@ Add:
 - dashboard auth (minimal pilot login in AEI-014 / #18, PR #20)
 - tenant-scoped CSV export (done in AEI-015 / #19, PR #21)
 - dashboard CSV download action (done in AEI-016 / #24)
-- improved logging reliability
+- improved logging reliability (implemented locally in AEI-017 / #26 with draft PR #27 open)
 - clearer methodology docs
 
 ### V3 - Working product
@@ -117,9 +117,9 @@ Add:
 
 ## 4. Current focus: V2 pilot readiness
 
-This document describes the full system roadmap. The V1 working prototype is complete. The completed V2 pilot-readiness slices are organizations and tenant-scoped API keys (AEI-013 / #15 / PR #17), dashboard login (AEI-014 / #18 / PR #20), tenant-scoped CSV export (AEI-015 / #19 / PR #21), and dashboard CSV download action (AEI-016 / #24).
+This document describes the full system roadmap. The V1 working prototype is complete. The completed V2 pilot-readiness slices are organizations and tenant-scoped API keys (AEI-013 / #15 / PR #17), dashboard login (AEI-014 / #18 / PR #20), tenant-scoped CSV export (AEI-015 / #19 / PR #21), and dashboard CSV download action (AEI-016 / #24). AEI-017 / #26 logging reliability hardening is active.
 
-No implementation task is active. The next decision is choosing the next bounded V2 pilot-readiness task.
+The current implementation task is AEI-017 / #26.
 
 ## 5. High-level architecture
 
@@ -474,4 +474,4 @@ Narrative:
 
 The V1 prototype, V2 organizations / tenant-scoped API-key slice, AEI-014 / #18 dashboard login, AEI-015 / #19 CSV export, and AEI-016 / #24 dashboard CSV download action are complete. Docs sync PR #22 is also merged, and `main` is aligned with `origin/main`.
 
-No implementation task is active. The next step is to choose the next bounded V2 pilot-readiness task.
+AEI-017 / #26 is active as the current bounded V2 pilot-readiness task for logging reliability hardening.

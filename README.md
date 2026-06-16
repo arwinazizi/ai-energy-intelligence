@@ -4,9 +4,9 @@ AI Energy Intelligence is a proxy-based measurement layer for AI usage. The V1 p
 
 ## Current Status
 
-This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md), plus the completed V2 pilot-readiness slices from AEI-013, AEI-014, AEI-015, and AEI-016. `main` is aligned with `origin/main`, docs sync PR #22 is merged, and no implementation task is active.
+This repository contains the completed V1 working prototype based on [IMPLEMENTATION.md](./IMPLEMENTATION.md), plus the completed V2 pilot-readiness slices from AEI-013, AEI-014, AEI-015, and AEI-016. `main` is aligned with `origin/main`, docs sync PR #22 is merged, and AEI-017 / #26 logging reliability hardening is the active V2 pilot-readiness task.
 
-The next project decision is choosing the next bounded V2 pilot-readiness task.
+The current project focus is completing AEI-017 / #26 logging reliability hardening.
 
 It includes:
 
@@ -32,6 +32,7 @@ It includes:
 - tenant-scoped CSV export through `GET /api/usage.csv`
 - minimal pilot dashboard login
 - a dashboard CSV download action for the tenant-scoped export
+- local AEI-017 logging reliability hardening changes with structured persistence warnings, bounded retry, and focused smoke coverage in draft PR #27
 - environment and repository hygiene files
 
 ## V1 Success Criteria
@@ -71,9 +72,9 @@ supabase/
 - Issue #18 / AEI-014 added a minimal pilot dashboard login and was completed, closed, and merged via PR #20.
 - Issue #19 / AEI-015 added tenant-scoped CSV export and was completed, closed, and merged via PR #21.
 - Issue #24 / AEI-016 added a minimal dashboard CSV download action.
+- Issue #26 / AEI-017 logging reliability hardening is implemented locally with draft PR #27 open.
 - Docs sync PR #22 is merged.
-- No implementation task is active.
-- Next recommended decision: pick the next bounded V2 pilot-readiness task.
+- Active implementation task: review and merge AEI-017 / PR #27.
 - Multi-provider support and streaming usage logging remain outside the completed V2 pilot-readiness slices.
 - The local dashboard can send `VITE_AEI_CLIENT_API_KEY` for protected tenant-scoped API reads during pilot/dev use.
 

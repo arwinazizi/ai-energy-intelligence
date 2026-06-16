@@ -217,9 +217,7 @@ export async function openAiProxy(req: Request, res: Response): Promise<void> {
 
         console.log("OpenAI usage extracted", usageLog);
 
-        void logUsage(usageLog).catch((error: unknown) => {
-          console.warn("OpenAI usage persistence failed", error);
-        });
+        void logUsage(usageLog).catch(() => undefined);
       });
 
       upstreamResponse.on("error", (error) => {
